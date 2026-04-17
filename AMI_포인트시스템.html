@@ -959,6 +959,7 @@ input:focus, select:focus { border-color: var(--blue); }
       <div class="card">
         <div class="section-head">개별 포인트 입력</div>
         <div class="label">학생 선택</div>
+        <input type="text" id="input-student-search" placeholder="이름 검색..." style="margin-bottom:6px;" oninput="filterInputStudents()">
         <select id="input-student" style="margin-bottom:12px;" onchange="updateInputTarget()">
           <option value="">학생 선택</option>
         </select>
@@ -1517,17 +1518,26 @@ function quickDelete(id) {
 }
 
 function renderInputSelect() {
+  filterInputStudents();
+}
+
+function filterInputStudents() {
   const sel = document.getElementById('input-student');
   if (!sel) return;
-  sel.innerHTML = '<option value="">학생 선택</option>' +
-    DB.students.map(s => `<option value="${s.id}">${s.name} (${s.grade})</option>`).join('');
+  const q = document.getElementById('input-student-search')?.value.trim().toLowerCase() || '';
+  const filtered = q
+    ? DB.students.filter(s => s.name.includes(q) || (s.cls||'').toLowerCase().includes(q) || s.grade.includes(q))
+    : DB.students;
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">학생 선택 (' + filtered.length + '명)</option>' +
+    filtered.map(s => `<option value="${s.id}" ${s.id==cur?'selected':''}>${s.name} (${s.grade} · ${s.cls||'반없음'})</option>`).join('');
 }
 
 function updateInputTarget() {
-  const id = parseInt(document.getElementById('input-student').value);
+  const idVal = document.getElementById('input-student').value;
   const badge = document.getElementById('input-target-badge');
-  if (!id) { badge.style.display = 'none'; return; }
-  const s = DB.students.find(s => s.id === id);
+  if (!idVal) { badge.style.display = 'none'; return; }
+  const s = DB.students.find(s => String(s.id) === String(idVal));
   if (s) {
     document.getElementById('input-target-name').textContent = s.name;
     document.getElementById('input-target-pts').textContent = s.pts;
@@ -1593,13 +1603,15 @@ function getPts(type, grade) {
 }
 
 function submitSingle() {
-  const id = parseInt(document.getElementById('input-student').value);
+  const idVal = document.getElementById('input-student').value;
   const type = document.getElementById('input-type').value;
   const date = document.getElementById('input-date').value;
   const memo = document.getElementById('input-memo').value;
-  if (!id || !type) { toast('학생과 항목을 선택하세요.'); return; }
+  if (!idVal || !type) { toast('학생과 항목을 선택하세요.'); return; }
 
-  const student = DB.students.find(s => s.id === id);
+  const student = DB.students.find(s => String(s.id) === String(idVal));
+  const id = student ? student.id : null;
+  if (!student) { toast('학생을 찾을 수 없습니다.'); return; }
   let pts;
   if (type === '직접입력') {
     pts = parseInt(document.getElementById('custom-pts').value);
