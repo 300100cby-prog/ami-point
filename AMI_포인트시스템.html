@@ -488,6 +488,42 @@ input:focus, select:focus { border-color: var(--blue); }
 .bulk-check-item.checked .bci-label { color: var(--blue); }
 .bulk-check-item.checked-minus .bci-label { color: var(--red); }
 
+/* 기타 포인트 입력 */
+.eta-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+.eta-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  line-height: 1;
+  transition: all 0.1s;
+}
+.eta-btn-minus { background: #FEE2E2; color: #DC2626; }
+.eta-btn-minus:hover { background: #DC2626; color: white; }
+.eta-btn-plus { background: #DCFCE7; color: #16A34A; }
+.eta-btn-plus:hover { background: #16A34A; color: white; }
+.eta-val {
+  font-size: 13px;
+  font-weight: 700;
+  min-width: 28px;
+  text-align: center;
+  color: var(--gray-900);
+}
+.eta-val.positive { color: var(--green); }
+.eta-val.negative { color: var(--red); }
+
 /* bulk input table */
 .bulk-table { width: 100%; border-collapse: collapse; font-size: 13px; }
 .bulk-table th {
@@ -872,9 +908,7 @@ input:focus, select:focus { border-color: var(--blue); }
       <input type="password" id="admin-pw" placeholder="비밀번호 입력" style="margin-bottom:4px;" onkeydown="if(event.key==='Enter')adminLogin()">
       <div class="error-msg" id="admin-error">비밀번호가 올바르지 않습니다.</div>
       <button class="btn btn-primary" onclick="adminLogin()">로그인</button>
-      <div style="margin-top:16px; padding-top:16px; border-top:1px solid var(--gray-100); font-size:12px; color:var(--gray-500); text-align:center;">
-        초기 비밀번호: <strong>ami2024</strong>
-      </div>
+
     </div>
   </div>
 </div>
@@ -1604,10 +1638,12 @@ function renderBulkTable() {
       <td style="text-align:center; font-weight:700; color:var(--blue); font-size:13px; padding:4px;">${s.pts}</td>
       ${BULK_TYPES.map(t => t.input ? `
       <td style="text-align:center; padding:4px 2px;">
-        <input type="number" class="brow-input" data-sid="${s.id}" data-type="${t.key}"
-          onchange="updateBulkPreviewMsg()" oninput="updateBulkPreviewMsg()"
-          placeholder="0" min="-99" max="99"
-          style="width:48px; padding:4px 2px; text-align:center; border:1px solid var(--gray-300); border-radius:6px; font-size:12px; font-family:'Noto Sans KR',sans-serif;">
+        <div class="eta-wrap">
+          <button class="eta-btn eta-btn-minus" onclick="etaChange('${s.id}', -1); event.stopPropagation();">−</button>
+          <span class="eta-val" id="eta-${s.id}" data-val="0">0</span>
+          <input type="hidden" class="brow-input" data-sid="${s.id}" data-type="${t.key}" value="0">
+          <button class="eta-btn eta-btn-plus" onclick="etaChange('${s.id}', 1); event.stopPropagation();">+</button>
+        </div>
       </td>` : `
       <td style="text-align:center; padding:4px 2px;">
         <input type="checkbox" class="brow-chk" data-sid="${s.id}" data-type="${t.key}"
@@ -1622,7 +1658,12 @@ function renderBulkTable() {
 function bulkCheckAll(type, checked) {
   if (type === null) {
     document.querySelectorAll('.brow-chk').forEach(c => c.checked = false);
-    document.querySelectorAll('.brow-input').forEach(c => c.value = '');
+    document.querySelectorAll('.brow-input').forEach(c => {
+      c.value = '0';
+      const sid = c.dataset.sid;
+      const el = document.getElementById('eta-' + sid);
+      if (el) { el.textContent = '0'; el.dataset.val = '0'; el.className = 'eta-val'; }
+    });
   } else {
     document.querySelectorAll(`.brow-chk[data-type="${type}"]`).forEach(c => c.checked = checked);
   }
@@ -1633,7 +1674,7 @@ function updateBulkPreviewMsg() {
   const msg = document.getElementById('bulk-preview-msg');
   if (!msg) return;
   const checked = document.querySelectorAll('.brow-chk:checked');
-  const inputs = [...document.querySelectorAll('.brow-input')].filter(i => i.value && parseInt(i.value) !== 0);
+  const inputs = [...document.querySelectorAll('.brow-input')].filter(i => parseInt(i.value || 0) !== 0);
   if (checked.length === 0 && inputs.length === 0) {
     msg.textContent = '체크된 항목이 없습니다.';
     msg.style.color = 'var(--gray-500)';
@@ -1650,7 +1691,7 @@ function updateBulkPreviewMsg() {
 function submitBulk() {
   const date = document.getElementById('bulk-date').value || today();
   const checked = document.querySelectorAll('.brow-chk:checked');
-  const inputs = [...document.querySelectorAll('.brow-input')].filter(i => i.value && parseInt(i.value) !== 0);
+  const inputs = [...document.querySelectorAll('.brow-input')].filter(i => parseInt(i.value || 0) !== 0);
 
   if (checked.length === 0 && inputs.length === 0) { toast('체크된 항목이 없습니다.'); return; }
 
@@ -2004,6 +2045,20 @@ function printStudentList() {
     <button onclick="window.print()" style="padding:10px 24px; background:#1B4FD8; color:white; border:none; border-radius:8px; font-size:14px; cursor:pointer;">🖨️ 인쇄하기</button>
   </body></html>`);
   printWin.document.close();
+}
+
+function etaChange(sid, delta) {
+  const hidden = document.querySelector(`.brow-input[data-sid="${sid}"]`);
+  const el = document.getElementById('eta-' + sid);
+  if (!hidden || !el) return;
+  let val = parseInt(hidden.value || 0) + delta;
+  if (val > 99) val = 99;
+  if (val < -99) val = -99;
+  hidden.value = val;
+  el.dataset.val = val;
+  el.textContent = val === 0 ? '0' : (val > 0 ? '+' + val : val);
+  el.className = 'eta-val' + (val > 0 ? ' positive' : val < 0 ? ' negative' : '');
+  updateBulkPreviewMsg();
 }
 
 function getTarget(grade) {
