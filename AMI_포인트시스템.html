@@ -1,0 +1,2212 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AMI 영어학원 포인트</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<style>
+:root {
+  --blue: #1B4FD8;
+  --blue-light: #3B6EF0;
+  --blue-pale: #EEF2FF;
+  --green: #16A34A;
+  --green-pale: #F0FDF4;
+  --orange: #EA580C;
+  --orange-pale: #FFF7ED;
+  --red: #DC2626;
+  --red-pale: #FEF2F2;
+  --gray-900: #0F172A;
+  --gray-700: #334155;
+  --gray-500: #64748B;
+  --gray-300: #CBD5E1;
+  --gray-100: #F1F5F9;
+  --gray-50: #F8FAFC;
+  --white: #FFFFFF;
+  --shadow: 0 4px 24px rgba(27,79,216,0.10);
+  --radius: 16px;
+  --radius-sm: 10px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  background: var(--gray-50);
+  color: var(--gray-900);
+  min-height: 100vh;
+}
+
+/* ── 공통 ── */
+.page { display: none; min-height: 100vh; }
+.page.active { display: block; }
+
+.top-bar {
+  background: var(--blue);
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.top-bar .logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  color: var(--white);
+  letter-spacing: 2px;
+}
+.top-bar .sub {
+  font-size: 11px;
+  color: rgba(255,255,255,0.7);
+  margin-top: 1px;
+}
+.btn-back {
+  background: rgba(255,255,255,0.15);
+  border: none;
+  color: white;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+.btn-back:hover { background: rgba(255,255,255,0.25); }
+
+.container { max-width: 480px; margin: 0 auto; padding: 24px 16px; }
+
+.card {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 24px;
+  margin-bottom: 16px;
+}
+
+.label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--gray-500);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+input[type=text], input[type=password], select {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid var(--gray-300);
+  border-radius: var(--radius-sm);
+  font-size: 16px;
+  font-family: 'Noto Sans KR', sans-serif;
+  color: var(--gray-900);
+  background: var(--white);
+  transition: border-color 0.2s;
+  outline: none;
+  -webkit-appearance: none;
+}
+input:focus, select:focus { border-color: var(--blue); }
+
+.btn {
+  width: 100%;
+  padding: 16px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 16px;
+  font-weight: 700;
+  font-family: 'Noto Sans KR', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 8px;
+}
+.btn-primary { background: var(--blue); color: white; }
+.btn-primary:hover { background: var(--blue-light); }
+.btn-success { background: var(--green); color: white; }
+.btn-success:hover { background: #15803D; }
+.btn-danger { background: var(--red); color: white; }
+.btn-outline {
+  background: transparent;
+  color: var(--blue);
+  border: 2px solid var(--blue);
+}
+.btn-outline:hover { background: var(--blue-pale); }
+.btn-sm {
+  width: auto;
+  padding: 8px 16px;
+  font-size: 13px;
+  margin-top: 0;
+}
+.btn-gray { background: var(--gray-100); color: var(--gray-700); }
+.btn-gray:hover { background: var(--gray-300); }
+
+.error-msg {
+  color: var(--red);
+  font-size: 13px;
+  margin-top: 8px;
+  display: none;
+}
+
+/* ── 홈 ── */
+#page-home {
+  background: linear-gradient(160deg, #1B4FD8 0%, #3B6EF0 50%, #6B8FF5 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 40px 20px;
+}
+#page-home.active { display: flex; }
+
+.home-logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 52px;
+  color: white;
+  letter-spacing: 6px;
+  text-align: center;
+  line-height: 1;
+}
+.home-sub {
+  font-size: 14px;
+  color: rgba(255,255,255,0.8);
+  margin-top: 6px;
+  margin-bottom: 48px;
+  text-align: center;
+  letter-spacing: 2px;
+}
+.home-capsule {
+  font-size: 80px;
+  margin-bottom: 32px;
+  animation: float 3s ease-in-out infinite;
+}
+@keyframes float {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+.home-btns { width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 12px; }
+.home-btn {
+  padding: 18px 24px;
+  border-radius: var(--radius);
+  border: none;
+  font-size: 17px;
+  font-weight: 700;
+  font-family: 'Noto Sans KR', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.home-btn-student {
+  background: white;
+  color: var(--blue);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+}
+.home-btn-student:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(0,0,0,0.2); }
+.home-btn-admin {
+  background: rgba(255,255,255,0.15);
+  color: white;
+  border: 2px solid rgba(255,255,255,0.3);
+}
+.home-btn-admin:hover { background: rgba(255,255,255,0.25); }
+.home-btn-icon { font-size: 22px; }
+
+/* ── 학생 조회 ── */
+.point-hero {
+  background: linear-gradient(135deg, var(--blue) 0%, var(--blue-light) 100%);
+  border-radius: var(--radius);
+  padding: 28px 24px;
+  color: white;
+  margin-bottom: 16px;
+  text-align: center;
+}
+.point-hero .name { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+.point-hero .grade { font-size: 13px; opacity: 0.8; margin-bottom: 20px; }
+.point-hero .pts-label { font-size: 12px; opacity: 0.7; letter-spacing: 1px; margin-bottom: 4px; }
+.point-hero .pts-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 72px;
+  line-height: 1;
+  letter-spacing: 2px;
+}
+.point-hero .pts-unit { font-size: 18px; opacity: 0.8; margin-left: 4px; }
+
+.progress-wrap { margin-top: 20px; }
+.progress-info { display: flex; justify-content: space-between; font-size: 12px; opacity: 0.8; margin-bottom: 6px; }
+.progress-bar {
+  height: 10px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: white;
+  border-radius: 10px;
+  transition: width 1s cubic-bezier(.4,0,.2,1);
+}
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+.stat-card {
+  background: var(--white);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  text-align: center;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+.stat-card .s-num { font-size: 28px; font-weight: 900; margin-bottom: 2px; }
+.stat-card .s-label { font-size: 11px; color: var(--gray-500); }
+.stat-card.blue .s-num { color: var(--blue); }
+.stat-card.green .s-num { color: var(--green); }
+.stat-card.orange .s-num { color: var(--orange); }
+.stat-card.red .s-num { color: var(--red); }
+
+.history-list { list-style: none; }
+.history-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--gray-100);
+  font-size: 14px;
+}
+.history-item:last-child { border-bottom: none; }
+.history-item .h-date { color: var(--gray-500); font-size: 12px; min-width: 60px; }
+.history-item .h-type { flex: 1; padding: 0 10px; }
+.history-item .h-pts { font-weight: 700; min-width: 44px; text-align: right; }
+.h-pts.plus { color: var(--green); }
+.h-pts.minus { color: var(--red); }
+
+/* ── 관리자 ── */
+.admin-nav {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+.nav-btn {
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 2px solid var(--gray-300);
+  background: white;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: 'Noto Sans KR', sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+  color: var(--gray-700);
+  transition: all 0.2s;
+}
+.nav-btn.active {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: white;
+}
+
+.admin-panel { display: none; }
+.admin-panel.active { display: block; }
+
+.student-row {
+  display: flex;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--gray-100);
+  gap: 10px;
+}
+.student-row:last-child { border-bottom: none; }
+.student-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--blue-pale);
+  color: var(--blue);
+  font-weight: 700;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.student-info { flex: 1; }
+.student-info .sname { font-size: 14px; font-weight: 700; }
+.student-info .sgrade { font-size: 12px; color: var(--gray-500); }
+.student-pts { font-weight: 900; font-size: 18px; color: var(--blue); min-width: 44px; text-align: right; }
+
+.input-row { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
+.input-row input, .input-row select { margin-bottom: 0; }
+.input-row .flex1 { flex: 1; }
+
+.tag {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.tag-elem { background: var(--blue-pale); color: var(--blue); }
+.tag-mid1 { background: var(--green-pale); color: var(--green); }
+.tag-mid23 { background: var(--orange-pale); color: var(--orange); }
+
+.section-head {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--gray-100);
+}
+
+.badge-target {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--blue-pale);
+  color: var(--blue);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--gray-900);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 30px;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: 'Noto Sans KR', sans-serif;
+  z-index: 9999;
+  transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+  white-space: nowrap;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+.divider { height: 1px; background: var(--gray-100); margin: 16px 0; }
+
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--gray-500);
+}
+.empty-state .e-icon { font-size: 40px; margin-bottom: 10px; }
+.empty-state .e-text { font-size: 14px; }
+
+.period-btn {
+  padding: 8px 18px;
+  border: 2px solid var(--gray-300);
+  border-radius: 20px;
+  background: var(--white);
+  font-size: 13px;
+  font-weight: 700;
+  font-family: 'Noto Sans KR', sans-serif;
+  cursor: pointer;
+  color: var(--gray-700);
+  transition: all 0.15s;
+}
+.period-btn:hover { border-color: var(--blue); color: var(--blue); }
+.period-btn.active {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: white;
+}
+
+.grade-btn {
+  padding: 8px 4px;
+  border: 2px solid var(--gray-300);
+  border-radius: 8px;
+  background: var(--white);
+  font-size: 12px;
+  font-weight: 700;
+  font-family: 'Noto Sans KR', sans-serif;
+  cursor: pointer;
+  color: var(--gray-700);
+  transition: all 0.15s;
+  text-align: center;
+}
+.grade-btn:hover { border-color: var(--blue); color: var(--blue); }
+.grade-btn.selected { background: var(--blue); border-color: var(--blue); color: white; }
+
+/* bulk check items */
+.bulk-check-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 2px solid var(--gray-200, #E2E8F0);
+  border-radius: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+  background: var(--white);
+  position: relative;
+}
+.bulk-check-item input[type=checkbox] {
+  display: none;
+}
+.bulk-check-item.checked {
+  border-color: var(--blue);
+  background: var(--blue-pale);
+}
+.bulk-check-item.checked-minus {
+  border-color: var(--red);
+  background: var(--red-pale);
+}
+.bci-content {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  pointer-events: none;
+}
+.bci-icon { font-size: 14px; }
+.bci-label { font-size: 13px; font-weight: 700; color: var(--gray-700); flex: 1; }
+.plus-badge {
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--green-pale);
+  color: var(--green);
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+.minus-badge {
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--red-pale);
+  color: var(--red);
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+.bulk-check-item.checked .bci-label { color: var(--blue); }
+.bulk-check-item.checked-minus .bci-label { color: var(--red); }
+
+/* bulk input table */
+.bulk-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.bulk-table th {
+  background: var(--blue);
+  color: white;
+  padding: 10px 8px;
+  text-align: center;
+  font-weight: 700;
+}
+.bulk-table td { padding: 6px 4px; border-bottom: 1px solid var(--gray-100); vertical-align: middle; }
+.bulk-student-row { transition: opacity 0.15s, background 0.15s; }
+.bulk-student-row:hover { background: var(--gray-50); }
+.bulk-table input[type=number] {
+  width: 54px;
+  padding: 6px 8px;
+  font-size: 13px;
+  text-align: center;
+  border: 1px solid var(--gray-300);
+  border-radius: 6px;
+}
+.bulk-table input:focus { border-color: var(--blue); outline: none; }
+.bulk-table .sn { font-weight: 700; font-size: 13px; }
+.bulk-table .sg { font-size: 11px; color: var(--gray-500); }
+
+/* ── 홈 리디자인 ── */
+#page-home {
+  background: #0A0E1A;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0;
+  overflow: hidden;
+  position: relative;
+}
+#page-home.active { display: flex; }
+
+.home-bg-lines {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.home-bg-lines::before {
+  content: '';
+  position: absolute;
+  top: -40%;
+  left: -20%;
+  width: 140%;
+  height: 100%;
+  background: radial-gradient(ellipse at 60% 40%, rgba(27,79,216,0.28) 0%, transparent 65%),
+              radial-gradient(ellipse at 20% 80%, rgba(16,163,74,0.12) 0%, transparent 50%);
+}
+.home-bg-lines::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+.home-header {
+  width: 100%;
+  padding: 48px 28px 0;
+  position: relative;
+  z-index: 2;
+  text-align: center;
+}
+.home-ybm-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 30px;
+  padding: 6px 16px;
+  margin-bottom: 24px;
+}
+.home-ybm-badge span {
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.7);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+.home-ybm-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #4ADE80;
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+@keyframes pulse-dot {
+  0%,100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+.home-logo-ami {
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 4px;
+  color: rgba(255,255,255,0.45);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.home-logo-eng {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 52px;
+  letter-spacing: 4px;
+  line-height: 1;
+  background: linear-gradient(135deg, #FFFFFF 0%, #A8C0FF 60%, #6B8FF5 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 2px;
+}
+.home-logo-sub {
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 2px;
+}
+.home-tagline-eng {
+  font-size: 13px;
+  font-style: italic;
+  color: #93C5FD;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+  font-weight: 400;
+}
+.home-tagline { margin-top: 22px; margin-bottom: 28px; }
+.home-tagline-main {
+  font-size: 19px;
+  font-weight: 900;
+  color: #FFFFFF;
+  line-height: 1.5;
+}
+.home-tagline-main em { font-style: normal; color: #60A5FA; }
+.home-tagline-sub {
+  font-size: 12px;
+  color: rgba(255,255,255,0.4);
+  margin-top: 8px;
+  line-height: 1.7;
+}
+.home-values {
+  display: flex;
+  gap: 7px;
+  justify-content: center;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+}
+.home-value-chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-size: 11px;
+  color: rgba(255,255,255,0.7);
+  font-weight: 500;
+}
+.home-btns {
+  width: 100%;
+  max-width: 360px;
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+  z-index: 2;
+}
+.home-btn {
+  padding: 0;
+  border-radius: 16px;
+  border: none;
+  font-family: 'Noto Sans KR', sans-serif;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(.4,0,.2,1);
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+.home-btn:hover { transform: translateY(-3px); }
+.home-btn:active { transform: scale(0.98); }
+.home-btn-student {
+  background: linear-gradient(135deg, #1B4FD8 0%, #3B6EF0 100%);
+  box-shadow: 0 8px 28px rgba(27,79,216,0.5);
+}
+.home-btn-reading {
+  background: linear-gradient(135deg, #065F46 0%, #059669 100%);
+  box-shadow: 0 8px 28px rgba(5,150,105,0.4);
+}
+.home-btn-admin {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.14);
+}
+.home-btn-admin:hover { background: rgba(255,255,255,0.1); box-shadow: none; }
+.hb-icon-wrap {
+  width: 62px;
+  height: 62px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.18);
+  flex-shrink: 0;
+  font-size: 24px;
+}
+.hb-text { flex: 1; padding: 0 14px; text-align: left; }
+.hb-title { font-size: 15px; font-weight: 700; color: white; }
+.hb-desc { font-size: 11px; color: rgba(255,255,255,0.55); margin-top: 2px; }
+.hb-arrow { font-size: 16px; color: rgba(255,255,255,0.35); padding-right: 14px; }
+.home-footer {
+  margin-top: 32px;
+  padding-bottom: 36px;
+  text-align: center;
+  position: relative;
+  z-index: 2;
+}
+.home-footer-text {
+  font-size: 11px;
+  color: rgba(255,255,255,0.2);
+  letter-spacing: 0.5px;
+}
+.home-divider {
+  display: flex; align-items: center; gap: 10px; justify-content: center; margin-bottom: 6px;
+}
+.home-divider::before, .home-divider::after {
+  content: ''; width: 36px; height: 1px; background: rgba(255,255,255,0.1);
+}
+@media (max-width: 360px) {
+  .home-logo-eng { font-size: 42px; }
+  .point-hero .pts-num { font-size: 60px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══ 홈 ══ -->
+<div id="page-home" class="page active">
+  <div class="home-bg-lines"></div>
+
+  <div class="home-header">
+    <div class="home-ybm-badge">
+      <div class="home-ybm-dot"></div>
+      <span>YBM ECC · 이천어학원</span>
+    </div>
+
+    <div class="home-logo-ami">AMI · English Academy</div>
+    <div class="home-logo-eng">YBM ECC</div>
+    <div class="home-logo-sub">이천어학원</div>
+
+    <div class="home-tagline">
+      <div class="home-tagline-eng">"Your English, Our Passion, One Goal."</div>
+      <div class="home-tagline-main">
+        잘 가르치고, 끝까지 <em>책임지는</em><br>영어 전문 학원
+      </div>
+      <div class="home-tagline-sub">
+        체계적인 커리큘럼 · 동기부여 포인트 시스템<br>200명의 꿈을 함께 키웁니다
+      </div>
+    </div>
+
+    <div class="home-values">
+      <div class="home-value-chip"><span>📚</span> 전문 커리큘럼</div>
+      <div class="home-value-chip"><span>🏆</span> 동기부여 시스템</div>
+      <div class="home-value-chip"><span>📊</span> 체계적 관리</div>
+    </div>
+  </div>
+
+  <div class="home-btns">
+    <button class="home-btn home-btn-student" onclick="showPage('page-student-login')">
+      <div class="hb-icon-wrap">⭐</div>
+      <div class="hb-text">
+        <div class="hb-title">내 포인트 확인</div>
+        <div class="hb-desc">출석 · 단어 · 숙제 포인트 조회</div>
+      </div>
+      <div class="hb-arrow">›</div>
+    </button>
+
+    <button class="home-btn home-btn-admin" onclick="showPage('page-admin-login')">
+      <div class="hb-icon-wrap">🔧</div>
+      <div class="hb-text">
+        <div class="hb-title">선생님 관리자</div>
+        <div class="hb-desc">포인트 · 학생 관리</div>
+      </div>
+      <div class="hb-arrow">›</div>
+    </button>
+  </div>
+
+  <div class="home-footer">
+    <div class="home-divider"></div>
+    <div class="home-footer-text">AMI 영어학원 · YBM ECC 이천어학원 · 경기도 이천시 부발읍</div>
+  </div>
+</div>
+
+<!-- ══ 학생 로그인 ══ -->
+<div id="page-student-login" class="page">
+  <div class="top-bar">
+    <div><div class="logo">AMI</div><div class="sub">포인트 확인</div></div>
+    <button class="btn-back" onclick="showPage('page-home')">← 홈</button>
+  </div>
+  <div class="container">
+    <div class="card">
+      <div style="text-align:center; margin-bottom:24px;">
+        <div style="font-size:48px; margin-bottom:8px;">⭐</div>
+        <div style="font-size:20px; font-weight:700;">내 포인트 확인하기</div>
+        <div style="font-size:13px; color:var(--gray-500); margin-top:4px;">이름과 학년을 입력해 주세요</div>
+      </div>
+      <div class="label">이름</div>
+      <input type="text" id="s-name" placeholder="홍길동" style="margin-bottom:12px;">
+      <div class="label">학년</div>
+      <input type="hidden" id="s-grade" value="">
+      <div style="margin-bottom:8px;">
+        <div style="font-size:11px; color:var(--gray-500); margin-bottom:6px; font-weight:600;">초등부</div>
+        <div style="display:grid; grid-template-columns:repeat(6,1fr); gap:6px; margin-bottom:10px;">
+          <button type="button" class="grade-btn" data-val="초등1" onclick="selectGrade(this)">1학년</button>
+          <button type="button" class="grade-btn" data-val="초등2" onclick="selectGrade(this)">2학년</button>
+          <button type="button" class="grade-btn" data-val="초등3" onclick="selectGrade(this)">3학년</button>
+          <button type="button" class="grade-btn" data-val="초등4" onclick="selectGrade(this)">4학년</button>
+          <button type="button" class="grade-btn" data-val="초등5" onclick="selectGrade(this)">5학년</button>
+          <button type="button" class="grade-btn" data-val="초등6" onclick="selectGrade(this)">6학년</button>
+        </div>
+        <div style="font-size:11px; color:var(--gray-500); margin-bottom:6px; font-weight:600;">중등부</div>
+        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:6px;">
+          <button type="button" class="grade-btn" data-val="중1" onclick="selectGrade(this)">중1</button>
+          <button type="button" class="grade-btn" data-val="중2" onclick="selectGrade(this)">중2</button>
+          <button type="button" class="grade-btn" data-val="중3" onclick="selectGrade(this)">중3</button>
+        </div>
+      </div>
+      <div class="error-msg" id="s-error">이름 또는 학년을 확인해 주세요.</div>
+      <button class="btn btn-primary" onclick="studentLogin()">확인하기</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 학생 대시보드 ══ -->
+<div id="page-student-dash" class="page">
+  <div class="top-bar">
+    <div><div class="logo">AMI</div><div class="sub">내 포인트</div></div>
+    <button class="btn-back" onclick="showPage('page-student-login')">← 다시</button>
+  </div>
+  <div class="container">
+    <div class="point-hero" id="student-hero">
+      <div class="name" id="sh-name"></div>
+      <div class="grade" id="sh-grade"></div>
+      <div class="pts-label">누적 포인트</div>
+      <div><span class="pts-num" id="sh-pts">0</span><span class="pts-unit">P</span></div>
+      <div class="progress-wrap">
+        <div class="progress-info">
+          <span>뽑기까지</span>
+          <span id="sh-remain"></span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="sh-bar" style="width:0%"></div></div>
+      </div>
+    </div>
+
+    <div class="grid-2" id="sh-stats"></div>
+
+    <div class="card">
+      <div class="section-head">포인트 내역</div>
+      <ul class="history-list" id="sh-history"></ul>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 관리자 로그인 ══ -->
+<div id="page-admin-login" class="page">
+  <div class="top-bar">
+    <div><div class="logo">AMI</div><div class="sub">관리자</div></div>
+    <button class="btn-back" onclick="showPage('page-home')">← 홈</button>
+  </div>
+  <div class="container">
+    <div class="card">
+      <div style="text-align:center; margin-bottom:24px;">
+        <div style="font-size:48px; margin-bottom:8px;">🔧</div>
+        <div style="font-size:20px; font-weight:700;">선생님 관리자</div>
+      </div>
+      <div class="label">관리자 비밀번호</div>
+      <input type="password" id="admin-pw" placeholder="비밀번호 입력" style="margin-bottom:4px;" onkeydown="if(event.key==='Enter')adminLogin()">
+      <div class="error-msg" id="admin-error">비밀번호가 올바르지 않습니다.</div>
+      <button class="btn btn-primary" onclick="adminLogin()">로그인</button>
+      <div style="margin-top:16px; padding-top:16px; border-top:1px solid var(--gray-100); font-size:12px; color:var(--gray-500); text-align:center;">
+        초기 비밀번호: <strong>ami2024</strong>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 관리자 대시보드 ══ -->
+<div id="page-admin-dash" class="page">
+  <div class="top-bar">
+    <div><div class="logo">AMI</div><div class="sub">관리자 모드</div></div>
+    <button class="btn-back" onclick="showPage('page-home')">← 로그아웃</button>
+  </div>
+  <div class="container">
+    <div class="admin-nav">
+      <button class="nav-btn active" onclick="switchPanel('panel-students', this)">학생 목록</button>
+      <button class="nav-btn" onclick="switchPanel('panel-input', this)">개별 입력</button>
+      <button class="nav-btn" onclick="switchPanel('panel-bulk', this)">일괄 입력</button>
+      <button class="nav-btn" onclick="switchPanel('panel-monthly', this)">월별 현황</button>
+      <button class="nav-btn" onclick="switchPanel('panel-add', this)">학생 추가</button>
+      <button class="nav-btn" onclick="switchPanel('panel-settings', this)">설정</button>
+    </div>
+
+    <!-- 학생 목록 -->
+    <div id="panel-students" class="admin-panel active">
+      <div class="card">
+        <div class="section-head">전체 학생 (<span id="total-count">0</span>명)</div>
+        <div style="display:flex; gap:8px; margin-bottom:10px;">
+          <input type="text" id="search-input" placeholder="이름 검색..." style="flex:1; margin-bottom:0;" oninput="renderStudentList()">
+          <select id="list-class-filter" style="width:110px; margin-bottom:0;" onchange="renderStudentList()">
+            <option value="전체">전체 반</option>
+          </select>
+        </div>
+        <div style="display:flex; gap:8px; margin-bottom:14px; align-items:center;">
+          <div class="label" style="margin:0; white-space:nowrap;">정렬</div>
+          <select id="list-sort" style="flex:1; margin-bottom:0;" onchange="renderStudentList()">
+            <option value="pts-desc">포인트 높은 순 ↓</option>
+            <option value="pts-asc">포인트 낮은 순 ↑</option>
+            <option value="name">이름순</option>
+            <option value="grade">학년순</option>
+            <option value="class">반순</option>
+          </select>
+          <button class="btn btn-outline btn-sm" onclick="printStudentList()" style="white-space:nowrap;">🖨️ 프린트</button>
+        </div>
+        <div id="student-list"></div>
+      </div>
+    </div>
+
+    <!-- 개별 입력 -->
+    <div id="panel-input" class="admin-panel">
+      <div class="card">
+        <div class="section-head">개별 포인트 입력</div>
+        <div class="label">학생 선택</div>
+        <select id="input-student" style="margin-bottom:12px;" onchange="updateInputTarget()">
+          <option value="">학생 선택</option>
+        </select>
+        <div id="input-target-badge" style="display:none" class="badge-target">
+          <span id="input-target-name"></span>
+          <span style="opacity:0.7; font-weight:400;">현재</span>
+          <span id="input-target-pts" style="font-size:16px;"></span>P
+        </div>
+        <div class="label">항목</div>
+        <select id="input-type" style="margin-bottom:12px;">
+          <optgroup label="✅ 적립">
+            <option value="출석">출석</option>
+            <option value="단어통과">단어 통과</option>
+            <option value="숙제완료">숙제 완료</option>
+            <option value="태도우수">수업 태도 우수</option>
+            <option value="원서">원서</option>
+          </optgroup>
+          <optgroup label="❌ 차감">
+            <option value="지각">지각 (−1P)</option>
+            <option value="태도불량">태도 불량 (−1P)</option>
+          </optgroup>
+          <optgroup label="🎰 포인트 사용">
+            <option value="뽑기사용">🎰 뽑기 사용 (학년별 자동차감)</option>
+            <option value="간식구매">🍭 간식 구매 (−30P)</option>
+            <option value="직접차감">직접 차감 (−P 입력)</option>
+          </optgroup>
+          <optgroup label="✏️ 직접입력">
+            <option value="직접입력">직접 입력 (±P)</option>
+          </optgroup>
+        </select>
+        <div id="custom-pts-wrap" style="display:none;">
+          <div class="label">포인트 (음수 = 차감)</div>
+          <input type="number" id="custom-pts" placeholder="예: 5 또는 -2" style="margin-bottom:12px;">
+        </div>
+        <div id="custom-deduct-wrap" style="display:none;">
+          <div class="label">차감 포인트</div>
+          <input type="number" id="custom-deduct" placeholder="예: 15" min="1" style="margin-bottom:12px;">
+        </div>
+        <div id="use-preview" style="display:none; margin-bottom:12px; padding:12px 16px; background:var(--red-pale); border-radius:10px; font-size:14px; color:var(--red); font-weight:700; text-align:center;"></div>
+        <div class="label">날짜</div>
+        <input type="text" id="input-date" style="margin-bottom:12px;">
+        <div class="label">메모 (선택)</div>
+        <input type="text" id="input-memo" placeholder="예: 단어 만점!" style="margin-bottom:4px;">
+        <button class="btn btn-success" onclick="submitSingle()">포인트 저장</button>
+      </div>
+    </div>
+
+    <!-- 일괄 입력 -->
+    <div id="panel-bulk" class="admin-panel">
+      <div class="card">
+        <div class="section-head">수업별 포인트 입력</div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px;">
+          <div>
+            <div class="label">반 선택</div>
+            <select id="bulk-class" onchange="renderBulkTable()" style="margin-bottom:0;">
+              <option value="전체">전체 보기</option>
+            </select>
+          </div>
+          <div>
+            <div class="label">날짜</div>
+            <input type="text" id="bulk-date-only" style="margin-bottom:0;" oninput="updateBulkDateValue()">
+          </div>
+        </div>
+
+        <div class="label">교시 선택</div>
+        <div style="display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap;">
+          <button class="period-btn active" data-period="1교시" onclick="selectPeriod(this)">1교시</button>
+          <button class="period-btn" data-period="2교시" onclick="selectPeriod(this)">2교시</button>
+          <button class="period-btn" data-period="3교시" onclick="selectPeriod(this)">3교시</button>
+          <button class="period-btn" data-period="4교시" onclick="selectPeriod(this)">4교시</button>
+          <button class="period-btn" data-period="5교시" onclick="selectPeriod(this)">5교시</button>
+        </div>
+        <input type="hidden" id="bulk-date" value="">
+
+        <div style="font-size:12px; color:var(--gray-500); margin-bottom:10px; padding:8px 12px; background:var(--gray-50); border-radius:8px;">
+          💡 교시 선택 후 학생별 항목을 체크하고 저장하세요. 교시별로 누적 저장됩니다.
+        </div>
+
+        <div style="overflow-x:auto; margin-bottom:14px;">
+          <table id="bulk-table" style="width:100%; border-collapse:collapse; font-size:13px;">
+            <thead id="bulk-thead"></thead>
+            <tbody id="bulk-tbody"></tbody>
+          </table>
+        </div>
+        <div style="display:flex; gap:8px; margin-bottom:10px;">
+          <button class="btn btn-gray btn-sm" onclick="bulkCheckAll('출석', true)">출석 전체</button>
+          <button class="btn btn-gray btn-sm" onclick="bulkCheckAll('단어통과', true)">단어 전체</button>
+          <button class="btn btn-gray btn-sm" onclick="bulkCheckAll('숙제완료', true)">숙제 전체</button>
+          <button class="btn btn-gray btn-sm" onclick="bulkCheckAll('원서', true)">원서 전체</button>
+          <button class="btn btn-gray btn-sm" onclick="bulkCheckAll(null, false)">전체 해제</button>
+        </div>
+        <div id="bulk-preview-msg" style="font-size:13px; color:var(--blue); font-weight:600; margin-bottom:10px; text-align:center;"></div>
+        <button class="btn btn-success" id="bulk-save-btn" onclick="submitBulk()">1교시 포인트 저장</button>
+      </div>
+    </div>
+
+    <!-- 월별 현황 -->
+    <div id="panel-monthly" class="admin-panel">
+      <div class="card">
+        <div class="section-head">월별 반별 포인트 현황</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:16px;">
+          <div>
+            <div class="label">월 선택</div>
+            <select id="monthly-month" style="margin-bottom:0;" onchange="renderMonthly()">
+            </select>
+          </div>
+          <div>
+            <div class="label">반 선택</div>
+            <select id="monthly-class" style="margin-bottom:0;" onchange="renderMonthly()">
+              <option value="전체">전체 반</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 요약 카드 -->
+        <div id="monthly-summary" style="display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:16px;"></div>
+
+        <!-- 학생별 테이블 -->
+        <div style="overflow-x:auto;">
+          <table style="width:100%; border-collapse:collapse; font-size:13px;">
+            <thead id="monthly-thead"></thead>
+            <tbody id="monthly-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 학생 추가 -->
+    <div id="panel-add" class="admin-panel">
+      <div class="card">
+        <div class="section-head">학생 추가</div>
+        <div class="label">이름</div>
+        <input type="text" id="add-name" placeholder="홍길동" style="margin-bottom:12px;">
+        <div class="label">학년</div>
+        <select id="add-grade" style="margin-bottom:12px;">
+          <optgroup label="초등부">
+            <option value="초등1">초등 1학년</option>
+            <option value="초등2">초등 2학년</option>
+            <option value="초등3">초등 3학년</option>
+            <option value="초등4">초등 4학년</option>
+            <option value="초등5">초등 5학년</option>
+            <option value="초등6">초등 6학년</option>
+          </optgroup>
+          <optgroup label="중등부">
+            <option value="중1">중1</option>
+            <option value="중2">중2</option>
+            <option value="중3">중3</option>
+          </optgroup>
+        </select>
+        <div class="label">반 (선택)</div>
+        <input type="text" id="add-class" placeholder="예: A반, 화목반" style="margin-bottom:4px;">
+        <button class="btn btn-primary" onclick="addStudent()">학생 추가</button>
+      </div>
+
+      <div class="card">
+        <div class="section-head">학생 일괄 등록 (복붙)</div>
+        <div style="font-size:13px; color:var(--gray-500); margin-bottom:10px;">한 줄에 한 명씩 입력: <strong>이름,학년,반</strong><br>예) 홍길동,초등,A반 / 김영희,중1,화목반</div>
+        <textarea id="bulk-add-text" style="width:100%; height:120px; padding:12px; border:2px solid var(--gray-300); border-radius:10px; font-size:14px; font-family:'Noto Sans KR',sans-serif; resize:vertical; outline:none;" placeholder="홍길동,초등,A반&#10;김영희,중1,화목반&#10;이철수,중2,월수반"></textarea>
+        <button class="btn btn-outline" style="margin-top:8px;" onclick="bulkAddStudents()">일괄 등록</button>
+      </div>
+
+      <div class="card">
+        <div class="section-head">📊 엑셀 파일로 일괄 등록</div>
+        <div style="font-size:13px; color:var(--gray-500); margin-bottom:14px;">
+          엑셀 파일의 열 순서: <strong>이름 / 학년 / 반</strong><br>
+          <span style="font-size:12px;">학년 입력값: 초등, 중1, 중2, 중3</span>
+        </div>
+        <button class="btn btn-outline" onclick="downloadTemplate()" style="margin-bottom:10px;">
+          📥 엑셀 양식 다운로드
+        </button>
+        <div id="excel-drop-zone" onclick="document.getElementById('excel-file').click()"
+          style="border:2px dashed var(--gray-300); border-radius:12px; padding:28px 20px; text-align:center; cursor:pointer; transition:all 0.2s; background:var(--gray-50);"
+          ondragover="event.preventDefault(); this.style.borderColor='var(--blue)'; this.style.background='var(--blue-pale)';"
+          ondragleave="this.style.borderColor='var(--gray-300)'; this.style.background='var(--gray-50)';"
+          ondrop="handleExcelDrop(event)">
+          <div style="font-size:32px; margin-bottom:8px;">📂</div>
+          <div style="font-size:14px; font-weight:700; color:var(--gray-700);">클릭하거나 파일을 드래그하세요</div>
+          <div style="font-size:12px; color:var(--gray-500); margin-top:4px;">.xlsx / .xls 파일</div>
+        </div>
+        <input type="file" id="excel-file" accept=".xlsx,.xls" style="display:none" onchange="handleExcelFile(event)">
+        <div id="excel-preview" style="display:none; margin-top:16px;">
+          <div class="section-head" style="margin-bottom:10px;">미리보기 <span id="excel-count" style="color:var(--blue);"></span></div>
+          <div style="overflow-x:auto; max-height:200px; overflow-y:auto; border:1px solid var(--gray-100); border-radius:8px;">
+            <table class="bulk-table" id="excel-preview-table">
+              <thead><tr>
+                <th style="text-align:left; padding-left:12px;">이름</th>
+                <th>학년</th>
+                <th>반</th>
+                <th>상태</th>
+              </tr></thead>
+              <tbody id="excel-preview-body"></tbody>
+            </table>
+          </div>
+          <button class="btn btn-success" style="margin-top:12px;" onclick="confirmExcelImport()">위 학생 등록하기</button>
+          <button class="btn btn-gray" style="margin-top:6px;" onclick="cancelExcelImport()">취소</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 설정 -->
+    <div id="panel-settings" class="admin-panel">
+      <div class="card">
+        <div class="section-head">비밀번호 변경</div>
+        <div class="label">현재 비밀번호</div>
+        <input type="password" id="pw-current" style="margin-bottom:12px;" placeholder="현재 비밀번호">
+        <div class="label">새 비밀번호</div>
+        <input type="password" id="pw-new" style="margin-bottom:4px;" placeholder="새 비밀번호">
+        <button class="btn btn-primary" onclick="changePw()">변경하기</button>
+      </div>
+      <div class="card">
+        <div class="section-head">뽑기 기준 포인트</div>
+        <div class="input-row" style="margin-bottom:10px;">
+          <span style="font-size:14px; min-width:70px;">초등부</span>
+          <input type="number" id="target-elem" style="flex:1; margin-bottom:0;">
+          <span style="font-size:13px; color:var(--gray-500);">P</span>
+        </div>
+        <div class="input-row" style="margin-bottom:10px;">
+          <span style="font-size:14px; min-width:70px;">중1</span>
+          <input type="number" id="target-mid1" style="flex:1; margin-bottom:0;">
+          <span style="font-size:13px; color:var(--gray-500);">P</span>
+        </div>
+        <div class="input-row" style="margin-bottom:10px;">
+          <span style="font-size:14px; min-width:70px;">중2·3</span>
+          <input type="number" id="target-mid23" style="flex:1; margin-bottom:0;">
+          <span style="font-size:13px; color:var(--gray-500);">P</span>
+        </div>
+        <button class="btn btn-primary" onclick="saveSettings()">저장</button>
+      </div>
+      <div class="card">
+        <div class="section-head" style="color:var(--red);">데이터 관리</div>
+        <button class="btn btn-danger" onclick="exportData()">데이터 내보내기 (JSON)</button>
+        <button class="btn btn-gray" style="margin-top:8px;" onclick="document.getElementById('import-file').click()">데이터 불러오기</button>
+        <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════
+// 데이터 구조
+// ══════════════════════════════════════
+// ══════════════════════════════════════
+// Firebase 설정
+// ══════════════════════════════════════
+const firebaseConfig = {
+  apiKey: "AIzaSyDPVcED5flK-2b5-FgFYD7QLUw_fX-Sl7E",
+  authDomain: "ami-point.firebaseapp.com",
+  projectId: "ami-point",
+  storageBucket: "ami-point.firebasestorage.app",
+  messagingSenderId: "877412012374",
+  appId: "1:877412012374:web:66ada4d7630429e60c86f7"
+};
+
+let firebaseApp, db_firestore;
+let DB = {
+  password: 'ami2024',
+  targets: { '초등': 60, '중1': 60, '중2': 35, '중3': 35 },
+  students: [],
+  history: []
+};
+let firebaseReady = false;
+
+function initFirebase() {
+  try {
+    firebaseApp = firebase.initializeApp(firebaseConfig);
+    db_firestore = firebase.firestore();
+    firebaseReady = true;
+    console.log('Firebase 연결 완료');
+  } catch(e) {
+    console.error('Firebase 초기화 실패:', e);
+    firebaseReady = false;
+  }
+}
+
+async function loadDB() {
+  if (!firebaseReady) { loadLocalDB(); return; }
+  showLoading(true);
+  try {
+    const doc = await db_firestore.collection('ami').doc('data').get();
+    if (doc.exists) {
+      DB = doc.data();
+      if (!DB.students) DB.students = [];
+      if (!DB.history) DB.history = [];
+      if (!DB.targets) DB.targets = { '초등': 60, '중1': 60, '중2': 35, '중3': 35 };
+      if (!DB.password) DB.password = 'ami2024';
+    }
+    // 로컬에도 백업
+    localStorage.setItem('ami_point_db', JSON.stringify(DB));
+  } catch(e) {
+    console.warn('Firebase 읽기 실패, 로컬 사용:', e);
+    loadLocalDB();
+  }
+  showLoading(false);
+}
+
+function loadLocalDB() {
+  const raw = localStorage.getItem('ami_point_db');
+  if (raw) { try { DB = JSON.parse(raw); } catch(e) {} }
+}
+
+async function saveDB() {
+  // 로컬 먼저 저장
+  localStorage.setItem('ami_point_db', JSON.stringify(DB));
+  if (!firebaseReady) return;
+  try {
+    await db_firestore.collection('ami').doc('data').set(DB);
+  } catch(e) {
+    console.warn('Firebase 저장 실패 (로컬에는 저장됨):', e);
+    showSyncStatus('⚠️ 오프라인 저장');
+    return;
+  }
+  showSyncStatus('✅ 저장 완료');
+}
+
+function showLoading(show) {
+  let el = document.getElementById('firebase-loading');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'firebase-loading';
+    el.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
+    el.innerHTML = '<div style="background:white;padding:24px 32px;border-radius:16px;font-family:Noto Sans KR,sans-serif;font-size:16px;font-weight:700;color:#1B4FD8;">⏳ 데이터 불러오는 중...</div>';
+    document.body.appendChild(el);
+  }
+  el.style.display = show ? 'flex' : 'none';
+}
+
+function showSyncStatus(msg) {
+  let el = document.getElementById('sync-status');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'sync-status';
+    el.style.cssText = 'position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:#0F172A;color:white;padding:8px 20px;border-radius:20px;font-size:13px;font-family:Noto Sans KR,sans-serif;z-index:9998;transition:opacity 0.3s;';
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.style.opacity = '1';
+  setTimeout(() => { el.style.opacity = '0'; }, 2000);
+}
+
+// ══════════════════════════════════════
+// 페이지 전환
+// ══════════════════════════════════════
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+
+  if (id === 'page-admin-dash') {
+    renderStudentList();
+    renderInputSelect();
+    updateBulkClassFilter();
+    renderBulkTable();
+    loadSettings();
+    setTodayDates();
+  }
+}
+
+function switchPanel(id, btn) {
+  document.querySelectorAll('.admin-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+  if (id === 'panel-bulk') { updateBulkClassFilter(); renderBulkTable(); }
+  if (id === 'panel-monthly') { initMonthlySelects(); renderMonthly(); }
+}
+
+// ══════════════════════════════════════
+// 학생 로그인
+// ══════════════════════════════════════
+function studentLogin() {
+  const name = document.getElementById('s-name').value.trim();
+  const grade = document.getElementById('s-grade').value;
+  const err = document.getElementById('s-error');
+  if (!name || !grade) { err.style.display = 'block'; return; }
+
+  const student = DB.students.find(s => s.name === name && s.grade === grade);
+  if (!student) { err.style.display = 'block'; err.textContent = '등록된 학생을 찾을 수 없습니다.'; return; }
+
+  err.style.display = 'none';
+  renderStudentDash(student);
+  showPage('page-student-dash');
+}
+
+function renderStudentDash(student) {
+  document.getElementById('sh-name').textContent = student.name + ' 학생';
+  const gradeLabel = { '초등1': '초등 1학년', '초등2': '초등 2학년', '초등3': '초등 3학년', '초등4': '초등 4학년', '초등5': '초등 5학년', '초등6': '초등 6학년', '중1': '중학교 1학년', '중2': '중학교 2학년', '중3': '중학교 3학년' };
+  document.getElementById('sh-grade').textContent = gradeLabel[student.grade] || student.grade;
+
+  document.getElementById('sh-pts').textContent = student.pts;
+
+  const target = getTarget(student.grade);
+  const remain = Math.max(0, target - student.pts);
+  const pct = Math.min(100, Math.round(student.pts / target * 100));
+  document.getElementById('sh-remain').textContent = remain > 0 ? `${remain}P 더 필요` : '🎉 뽑기 가능!';
+  setTimeout(() => { document.getElementById('sh-bar').style.width = pct + '%'; }, 100);
+
+  // 통계
+  const hist = DB.history.filter(h => h.sid === student.id);
+  const earned = hist.filter(h => h.pts > 0).reduce((a, b) => a + b.pts, 0);
+  const deducted = hist.filter(h => h.pts < 0).reduce((a, b) => a + Math.abs(b.pts), 0);
+  const days = [...new Set(hist.map(h => h.date))].length;
+
+  document.getElementById('sh-stats').innerHTML = `
+    <div class="stat-card blue"><div class="s-num">${student.pts}</div><div class="s-label">누적 포인트</div></div>
+    <div class="stat-card green"><div class="s-num">${target}</div><div class="s-label">뽑기 기준</div></div>
+    <div class="stat-card orange"><div class="s-num">${earned}</div><div class="s-label">총 적립</div></div>
+    <div class="stat-card red"><div class="s-num">${deducted}</div><div class="s-label">총 차감</div></div>
+  `;
+
+  // 내역
+  const histEl = document.getElementById('sh-history');
+  const recent = [...hist].reverse().slice(0, 20);
+  if (recent.length === 0) {
+    histEl.innerHTML = '<div class="empty-state"><div class="e-icon">📋</div><div class="e-text">아직 기록이 없어요</div></div>';
+  } else {
+    histEl.innerHTML = recent.map(h => `
+      <li class="history-item">
+        <span class="h-date">${h.date}</span>
+        <span class="h-type">${h.type}${h.memo ? ' · ' + h.memo : ''}</span>
+        <span class="h-pts ${h.pts > 0 ? 'plus' : 'minus'}">${h.pts > 0 ? '+' : ''}${h.pts}P</span>
+      </li>
+    `).join('');
+  }
+}
+
+// ══════════════════════════════════════
+// 관리자
+// ══════════════════════════════════════
+function adminLogin() {
+  const pw = document.getElementById('admin-pw').value;
+  if (pw === DB.password) {
+    document.getElementById('admin-pw').value = '';
+    document.getElementById('admin-error').style.display = 'none';
+    showPage('page-admin-dash');
+  } else {
+    document.getElementById('admin-error').style.display = 'block';
+  }
+}
+
+function renderStudentList() {
+  const q = document.getElementById('search-input')?.value.trim().toLowerCase() || '';
+  const clsFilter = document.getElementById('list-class-filter')?.value || '전체';
+  // 반 필터 드롭다운 업데이트
+  const clsSel = document.getElementById('list-class-filter');
+  if (clsSel) {
+    const classes = [...new Set(DB.students.map(s => s.cls).filter(c => c && c.trim()))].sort();
+    const curVal = clsSel.value;
+    clsSel.innerHTML = '<option value="전체">전체 반</option>' +
+      classes.map(c => `<option value="${c}"${c===curVal?' selected':''}>${c}</option>`).join('');
+  }
+  const sort = document.getElementById('list-sort')?.value || 'pts-desc';
+  let list = DB.students.filter(s => {
+    const matchName = s.name.includes(q) || (s.cls || '').toLowerCase().includes(q);
+    const matchCls = clsFilter === '전체' || s.cls === clsFilter;
+    return matchName && matchCls;
+  });
+  list = [...list].sort((a, b) => {
+    if (sort === 'pts-desc') return b.pts - a.pts;
+    if (sort === 'pts-asc') return a.pts - b.pts;
+    if (sort === 'name') return a.name.localeCompare(b.name, 'ko');
+    if (sort === 'grade') return a.grade.localeCompare(b.grade, 'ko');
+    if (sort === 'class') return (a.cls||'').localeCompare(b.cls||'', 'ko');
+    return 0;
+  });
+  document.getElementById('total-count').textContent = DB.students.length;
+
+  const colors = { elem: '#1B4FD8', '중1': '#16A34A', '중2': '#EA580C', '중3': '#DC2626' };
+  const tagClass = g => g && g.startsWith('초등') ? 'tag-elem' : g === '중1' ? 'tag-mid1' : 'tag-mid23';
+
+  if (list.length === 0) {
+    document.getElementById('student-list').innerHTML = '<div class="empty-state"><div class="e-icon">🔍</div><div class="e-text">검색 결과 없음</div></div>';
+    return;
+  }
+
+  document.getElementById('student-list').innerHTML = list.map((s, i) => {
+    const target = getTarget(s.grade);
+    const pct = Math.min(100, Math.round(s.pts / target * 100));
+    const sort = document.getElementById('list-sort')?.value || 'pts-desc';
+    const rankBadge = sort === 'pts-desc' ? `<span style="font-size:11px; font-weight:700; color:${i===0?'#F59E0B':i===1?'#94A3B8':i===2?'#CD7C2F':'var(--gray-400)'}; min-width:20px;">${i===0?'🥇':i===1?'🥈':i===2?'🥉':`${i+1}위`}</span>` : '';
+    const canDraw = s.pts >= target;
+    return `
+    <div class="student-row">
+      <div class="student-avatar" style="background:${(colors[s.grade]||colors.elem)}22; color:${(colors[s.grade]||colors.elem)};">${s.name[0]}</div>
+      <div class="student-info">
+        <div class="sname">${rankBadge} ${s.name} <span class="tag ${tagClass(s.grade)}">${s.grade}</span>${canDraw ? ' <span style="font-size:11px; color:var(--green); font-weight:700;">🎰</span>' : ''}</div>
+        <div class="sgrade">${s.cls || ''} &nbsp; ${pct}% (${s.pts}/${target}P)</div>
+      </div>
+      <div style="display:flex; gap:6px; align-items:center;">
+        <span class="student-pts">${s.pts}P</span>
+        <button class="btn btn-gray btn-sm" onclick="quickDelete(${s.id})">삭제</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function quickDelete(id) {
+  if (!confirm('삭제하시겠습니까?')) return;
+  DB.students = DB.students.filter(s => s.id !== id);
+  DB.history = DB.history.filter(h => h.sid !== id);
+  saveDB();
+  renderStudentList();
+  renderInputSelect();
+  toast('삭제되었습니다.');
+}
+
+function renderInputSelect() {
+  const sel = document.getElementById('input-student');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">학생 선택</option>' +
+    DB.students.map(s => `<option value="${s.id}">${s.name} (${s.grade})</option>`).join('');
+}
+
+function updateInputTarget() {
+  const id = parseInt(document.getElementById('input-student').value);
+  const badge = document.getElementById('input-target-badge');
+  if (!id) { badge.style.display = 'none'; return; }
+  const s = DB.students.find(s => s.id === id);
+  if (s) {
+    document.getElementById('input-target-name').textContent = s.name;
+    document.getElementById('input-target-pts').textContent = s.pts;
+    badge.style.display = 'inline-flex';
+  }
+  // 학년별 기본 포인트 자동 세팅
+  const sel = document.getElementById('input-type');
+  if (s) {
+    const opts = sel.querySelectorAll('option');
+    opts.forEach(o => {
+      if (o.value === '출석') {
+        if (s.grade === '중1') o.text = '출석 (+10P)';
+        else if (s.grade === '중2' || s.grade === '중3') o.text = '출석 (+4P 타임)';
+        else o.text = '출석 (+1P)';
+      }
+    });
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('input-type').addEventListener('change', function() {
+    const v = this.value;
+    document.getElementById('custom-pts-wrap').style.display = v === '직접입력' ? 'block' : 'none';
+    document.getElementById('custom-deduct-wrap').style.display = v === '직접차감' ? 'block' : 'none';
+    // 포인트 사용 미리보기
+    const preview = document.getElementById('use-preview');
+    const sid = parseInt(document.getElementById('input-student').value);
+    const s = DB.students.find(s => s.id === sid);
+    if (v === '뽑기사용' && s) {
+      const tgt = getTarget(s.grade);
+      preview.style.display = 'block';
+      preview.textContent = `🎰 뽑기 사용 → −${tgt}P (현재 ${s.pts}P → ${s.pts - tgt}P)`;
+    } else if (v === '간식구매' && s) {
+      preview.style.display = 'block';
+      preview.textContent = `🍭 간식 구매 → −30P (현재 ${s.pts}P → ${s.pts - 30}P)`;
+    } else {
+      preview.style.display = 'none';
+    }
+  });
+});
+
+function isElem(grade) { return grade && grade.startsWith('초등'); }
+function getPts(type, grade) {
+  if (type === '출석') {
+    if (grade === '중1') return 10;
+    if (grade === '중2' || grade === '중3') return 4;
+    return 1;
+  }
+  if (type === '단어통과') {
+    if (grade === '중1') return 3;
+    if (grade === '중2' || grade === '중3') return 2;
+    return 1;
+  }
+  if (type === '숙제완료') {
+    if (grade === '중1') return 5;
+    if (grade === '중2' || grade === '중3') return 4;
+    return 1;
+  }
+  if (type === '지각' || type === '태도불량') return -1;
+  if (type === '태도우수') return 1;
+  if (type === '원서') return 1;
+  return 0;
+}
+
+function submitSingle() {
+  const id = parseInt(document.getElementById('input-student').value);
+  const type = document.getElementById('input-type').value;
+  const date = document.getElementById('input-date').value;
+  const memo = document.getElementById('input-memo').value;
+  if (!id || !type) { toast('학생과 항목을 선택하세요.'); return; }
+
+  const student = DB.students.find(s => s.id === id);
+  let pts;
+  if (type === '직접입력') {
+    pts = parseInt(document.getElementById('custom-pts').value);
+    if (isNaN(pts)) { toast('포인트를 입력하세요.'); return; }
+  } else if (type === '직접차감') {
+    const v = parseInt(document.getElementById('custom-deduct').value);
+    if (isNaN(v) || v <= 0) { toast('차감 포인트를 입력하세요.'); return; }
+    pts = -v;
+  } else if (type === '뽑기사용') {
+    pts = -getTarget(student.grade);
+    if (student.pts < Math.abs(pts)) {
+      toast(`포인트 부족! (필요: ${Math.abs(pts)}P / 현재: ${student.pts}P)`);
+      return;
+    }
+  } else if (type === '간식구매') {
+    pts = -30;
+    if (student.pts < 30) {
+      toast(`포인트 부족! (필요: 30P / 현재: ${student.pts}P)`);
+      return;
+    }
+  } else {
+    pts = getPts(type, student.grade);
+  }
+
+  student.pts += pts;
+  DB.history.push({ sid: id, date: date || today(), type, pts, memo });
+  saveDB();
+  document.getElementById('input-target-pts').textContent = student.pts;
+  document.getElementById('input-memo').value = '';
+  toast(`${student.name} ${pts > 0 ? '+' : ''}${pts}P 저장!`);
+  renderStudentList();
+}
+
+function updateBulkClassFilter() {
+  const sel = document.getElementById('bulk-class');
+  if (!sel) return;
+  const classes = [...new Set(DB.students.map(s => s.cls).filter(c => c && c.trim()))].sort();
+  const cur = sel.value;
+  sel.innerHTML = '<option value="전체">전체 보기</option>' +
+    classes.map(c => `<option value="${c}"${c===cur?' selected':''}>${c}</option>`).join('');
+}
+
+// 항목 정의
+const BULK_TYPES = [
+  { key: '기타',    label: '기타',   plus: null,  input: true  },
+  { key: '출석',    label: '출석',   plus: true,  input: false },
+  { key: '단어통과', label: '단어',   plus: true,  input: false },
+  { key: '숙제완료', label: '숙제',   plus: true,  input: false },
+  { key: '태도우수', label: '태도⭐', plus: true,  input: false },
+  { key: '지각',    label: '지각',   plus: false, input: false },
+  { key: '태도불량', label: '태도⚠️',plus: false, input: false },
+  { key: '원서',    label: '원서📖', plus: true,  input: false },
+];
+
+function renderBulkTable() {
+  updateBulkClassFilter();
+  const cls = document.getElementById('bulk-class')?.value || '전체';
+  const list = cls === '전체' ? DB.students : DB.students.filter(s => s.cls === cls);
+
+  // 헤더
+  const thead = document.getElementById('bulk-thead');
+  thead.innerHTML = `<tr style="background:var(--blue);">
+    <th style="text-align:left; padding:10px 8px 10px 12px; color:white; font-size:13px; white-space:nowrap; min-width:60px;">이름</th>
+    <th style="padding:10px 4px; color:white; font-size:12px; text-align:center; min-width:36px;">P</th>
+    ${BULK_TYPES.map(t => `
+    <th style="padding:10px 3px; color:white; font-size:11px; text-align:center; min-width:${t.input ? '52px' : '40px'}; font-weight:700;">
+      <div>${t.label}</div>
+      <div style="font-size:9px; opacity:0.8; margin-top:1px;">${t.plus === true ? '+P' : t.plus === false ? '−P' : '±P'}</div>
+    </th>`).join('')}
+  </tr>`;
+
+  // 바디
+  const tbody = document.getElementById('bulk-tbody');
+  tbody.innerHTML = list.map((s, i) => {
+    const bg = i % 2 === 0 ? '#fff' : '#f8fafc';
+    const tagCls = s.grade&&s.grade.startsWith('초등') ? 'tag-elem' : s.grade === '중1' ? 'tag-mid1' : 'tag-mid23';
+    return `<tr style="background:${bg};">
+      <td style="padding:7px 4px 7px 12px; white-space:nowrap;">
+        <div style="font-weight:700; font-size:13px;">${s.name}</div>
+        <span class="tag ${tagCls}" style="font-size:10px; padding:1px 6px;">${s.grade}</span>
+      </td>
+      <td style="text-align:center; font-weight:700; color:var(--blue); font-size:13px; padding:4px;">${s.pts}</td>
+      ${BULK_TYPES.map(t => t.input ? `
+      <td style="text-align:center; padding:4px 2px;">
+        <input type="number" class="brow-input" data-sid="${s.id}" data-type="${t.key}"
+          onchange="updateBulkPreviewMsg()" oninput="updateBulkPreviewMsg()"
+          placeholder="0" min="-99" max="99"
+          style="width:48px; padding:4px 2px; text-align:center; border:1px solid var(--gray-300); border-radius:6px; font-size:12px; font-family:'Noto Sans KR',sans-serif;">
+      </td>` : `
+      <td style="text-align:center; padding:4px 2px;">
+        <input type="checkbox" class="brow-chk" data-sid="${s.id}" data-type="${t.key}"
+          onchange="updateBulkPreviewMsg()"
+          style="width:18px; height:18px; cursor:pointer; accent-color:${t.plus ? 'var(--blue)' : 'var(--red)'};">
+      </td>`).join('')}
+    </tr>`;
+  }).join('');
+  updateBulkPreviewMsg();
+}
+
+function bulkCheckAll(type, checked) {
+  if (type === null) {
+    document.querySelectorAll('.brow-chk').forEach(c => c.checked = false);
+    document.querySelectorAll('.brow-input').forEach(c => c.value = '');
+  } else {
+    document.querySelectorAll(`.brow-chk[data-type="${type}"]`).forEach(c => c.checked = checked);
+  }
+  updateBulkPreviewMsg();
+}
+
+function updateBulkPreviewMsg() {
+  const msg = document.getElementById('bulk-preview-msg');
+  if (!msg) return;
+  const checked = document.querySelectorAll('.brow-chk:checked');
+  const inputs = [...document.querySelectorAll('.brow-input')].filter(i => i.value && parseInt(i.value) !== 0);
+  if (checked.length === 0 && inputs.length === 0) {
+    msg.textContent = '체크된 항목이 없습니다.';
+    msg.style.color = 'var(--gray-500)';
+    return;
+  }
+  const counts = {};
+  checked.forEach(c => { counts[c.dataset.type] = (counts[c.dataset.type] || 0) + 1; });
+  if (inputs.length > 0) counts['기타'] = inputs.length;
+  const summary = Object.entries(counts).map(([t,n]) => `${t} ${n}명`).join(' · ');
+  msg.textContent = `저장 예정: ${summary}`;
+  msg.style.color = 'var(--blue)';
+}
+
+function submitBulk() {
+  const date = document.getElementById('bulk-date').value || today();
+  const checked = document.querySelectorAll('.brow-chk:checked');
+  const inputs = [...document.querySelectorAll('.brow-input')].filter(i => i.value && parseInt(i.value) !== 0);
+
+  if (checked.length === 0 && inputs.length === 0) { toast('체크된 항목이 없습니다.'); return; }
+
+  let totalApplied = 0;
+  const studentMap = {};
+
+  // 체크박스 항목 처리
+  checked.forEach(c => {
+    const sid = c.dataset.sid;
+    const type = c.dataset.type;
+    const s = DB.students.find(s => String(s.id) === String(sid));
+    if (s) {
+      const pts = getPts(type, s.grade);
+      s.pts += pts;
+      DB.history.push({ sid: s.id, date, type, pts });
+      totalApplied++;
+      studentMap[sid] = true;
+    }
+  });
+
+  // 기타 숫자입력 처리
+  inputs.forEach(inp => {
+    const sid = inp.dataset.sid;
+    const pts = parseInt(inp.value);
+    const s = DB.students.find(s => String(s.id) === String(sid));
+    if (s && pts !== 0) {
+      s.pts += pts;
+      DB.history.push({ sid: s.id, date, type: `기타(${pts > 0 ? '+' : ''}${pts}P)`, pts });
+      totalApplied++;
+      studentMap[sid] = true;
+    }
+  });
+
+  saveDB();
+  renderBulkTable();
+  renderStudentList();
+  toast(`${Object.keys(studentMap).length}명 · ${totalApplied}건 저장 완료!`);
+}
+
+function addStudent() {
+  const name = document.getElementById('add-name').value.trim();
+  const grade = document.getElementById('add-grade').value;
+  const cls = document.getElementById('add-class').value.trim();
+  if (!name) { toast('이름을 입력하세요.'); return; }
+  if (DB.students.find(s => s.name === name && s.grade === grade)) {
+    toast('이미 등록된 학생입니다.'); return;
+  }
+  const id = Date.now();
+  DB.students.push({ id, name, grade, cls, pts: 0 });
+  saveDB();
+  document.getElementById('add-name').value = '';
+  document.getElementById('add-class').value = '';
+  renderStudentList();
+  renderInputSelect();
+  toast(`${name} 학생 추가 완료!`);
+}
+
+function bulkAddStudents() {
+  const text = document.getElementById('bulk-add-text').value.trim();
+  if (!text) return;
+  const lines = text.split('\n').filter(l => l.trim());
+  let added = 0;
+  lines.forEach(line => {
+    const parts = line.split(',').map(p => p.trim());
+    if (parts.length < 2) return;
+    const [name, grade] = parts;
+    if (!name || !grade) return;
+    if (DB.students.find(s => s.name === name && s.grade === grade)) return;
+    DB.students.push({ id: Date.now() + Math.random(), name, grade, cls: '', pts: 0 });
+    added++;
+  });
+  saveDB();
+  renderStudentList();
+  renderInputSelect();
+  document.getElementById('bulk-add-text').value = '';
+  toast(`${added}명 등록 완료!`);
+}
+
+function loadSettings() {
+  document.getElementById('target-elem').value = DB.targets['초등'] || 60;
+  document.getElementById('target-mid1').value = DB.targets['중1'] || 60;
+  document.getElementById('target-mid23').value = DB.targets['중2'] || 35;
+}
+
+function saveSettings() {
+  DB.targets['초등'] = parseInt(document.getElementById('target-elem').value) || 60;
+  DB.targets['중1'] = parseInt(document.getElementById('target-mid1').value) || 60;
+  DB.targets['중2'] = parseInt(document.getElementById('target-mid23').value) || 35;
+  DB.targets['중3'] = DB.targets['중2'];
+  saveDB();
+  toast('설정 저장 완료!');
+}
+
+function changePw() {
+  const cur = document.getElementById('pw-current').value;
+  const nw = document.getElementById('pw-new').value;
+  if (cur !== DB.password) { toast('현재 비밀번호가 틀립니다.'); return; }
+  if (!nw) { toast('새 비밀번호를 입력하세요.'); return; }
+  DB.password = nw;
+  saveDB();
+  document.getElementById('pw-current').value = '';
+  document.getElementById('pw-new').value = '';
+  toast('비밀번호 변경 완료!');
+}
+
+function exportData() {
+  const blob = new Blob([JSON.stringify(DB, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `ami_points_${today().replace(/\//g, '')}.json`;
+  a.click();
+}
+
+function importData(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      DB = JSON.parse(ev.target.result);
+      saveDB();
+      renderStudentList();
+      renderInputSelect();
+      loadSettings();
+      toast('데이터 불러오기 완료!');
+    } catch { toast('파일 형식이 올바르지 않습니다.'); }
+  };
+  reader.readAsText(file);
+}
+
+// ══════════════════════════════════════
+// 월별 현황
+// ══════════════════════════════════════
+function initMonthlySelects() {
+  // 월 목록: 히스토리에서 추출
+  // YYYY/MM/DD 형식에서 YYYY년 MM월 추출
+  const monthSet = new Set();
+  DB.history.forEach(h => {
+    const d = String(h.date || '');
+    // YYYY/MM/DD 형식
+    const m1 = d.match(/^(\d{4})\/(\d{2})\//);
+    if (m1) { monthSet.add(m1[1] + '년 ' + m1[2] + '월'); return; }
+    // 구형 MM/DD 형식 (기존 데이터 호환)
+    const m2 = d.match(/^(\d{2})\//);
+    if (m2) { monthSet.add(new Date().getFullYear() + '년 ' + m2[1] + '월'); }
+  });
+
+  const now = new Date();
+  const curMonth = `${now.getFullYear()}년 ${String(now.getMonth()+1).padStart(2,'0')}월`;
+  if (!monthSet.has(curMonth)) monthSet.add(curMonth);
+  const months = [...monthSet].sort();
+
+  const sel = document.getElementById('monthly-month');
+  if (sel) {
+    sel.innerHTML = months.map(m =>
+      `<option value="${m}" ${m === curMonth ? 'selected' : ''}>${m}</option>`
+    ).join('');
+  }
+
+  // 반 목록
+  const clsSel = document.getElementById('monthly-class');
+  if (clsSel) {
+    const classes = [...new Set(DB.students.map(s => s.cls).filter(c => c && c.trim()))].sort();
+    clsSel.innerHTML = '<option value="전체">전체 반</option>' +
+      classes.map(c => `<option value="${c}">${c}</option>`).join('');
+  }
+}
+
+function renderMonthly() {
+  const month = document.getElementById('monthly-month')?.value || '';
+  const cls = document.getElementById('monthly-class')?.value || '전체';
+  // "2026년 04월" 파싱
+  const ymMatch = month.match(/(\d{4})년\s*(\d{2})월/);
+  const filterYear = ymMatch ? ymMatch[1] : '';
+  const filterMM = ymMatch ? ymMatch[2] : '';
+
+  const monthHist = DB.history.filter(h => {
+    const d = String(h.date || '');
+    // YYYY/MM/DD 형식
+    if (d.match(/^\d{4}\//)) {
+      return d.startsWith(filterYear + '/' + filterMM + '/');
+    }
+    // 구형 MM/DD 형식 호환
+    return d.startsWith(filterMM + '/');
+  });
+
+  // 학생 필터
+  const students = cls === '전체'
+    ? DB.students
+    : DB.students.filter(s => s.cls === cls);
+
+  if (students.length === 0) {
+    document.getElementById('monthly-tbody').innerHTML =
+      '<tr><td colspan="10" style="text-align:center; padding:24px; color:var(--gray-500);">학생이 없습니다.</td></tr>';
+    document.getElementById('monthly-summary').innerHTML = '';
+    return;
+  }
+
+  // 항목 목록 (해당 월에 사용된 항목)
+  const typeSet = [...new Set(monthHist.map(h => h.type))];
+  const PLUS_TYPES = ['출석','단어통과','숙제완료','태도우수','원서'];
+  const MINUS_TYPES = ['지각','태도불량'];
+  const plusTypes = PLUS_TYPES.filter(t => typeSet.includes(t));
+  const minusTypes = MINUS_TYPES.filter(t => typeSet.includes(t));
+  const etcTypes = typeSet.filter(t => !PLUS_TYPES.includes(t) && !MINUS_TYPES.includes(t));
+
+  // 학생별 집계
+  const rows = students.map(s => {
+    const hist = monthHist.filter(h => String(h.sid) === String(s.id));
+    const byType = {};
+    let total = 0;
+    hist.forEach(h => {
+      byType[h.type] = (byType[h.type] || 0) + h.pts;
+      total += h.pts;
+    });
+    return { s, byType, total };
+  }).sort((a, b) => b.total - a.total);
+
+  // 요약 카드
+  const totalPts = rows.reduce((a, r) => a + r.total, 0);
+  const avgPts = rows.length ? Math.round(totalPts / rows.length) : 0;
+  const topStudent = rows[0];
+  document.getElementById('monthly-summary').innerHTML = `
+    <div class="stat-card blue"><div class="s-num">${rows.length}</div><div class="s-label">대상 학생</div></div>
+    <div class="stat-card green"><div class="s-num">${avgPts}</div><div class="s-label">평균 포인트</div></div>
+    <div class="stat-card orange"><div class="s-num">${topStudent ? topStudent.total : 0}</div><div class="s-label">최고 ${topStudent ? topStudent.s.name : '-'}</div></div>
+  `;
+
+  // 헤더
+  const allTypes = [...plusTypes, ...minusTypes, ...etcTypes];
+  const thStyle = 'padding:8px 4px; color:white; font-size:11px; text-align:center; min-width:38px; font-weight:700;';
+  document.getElementById('monthly-thead').innerHTML = `<tr style="background:var(--blue);">
+    <th style="text-align:left; padding:8px 4px 8px 12px; color:white; font-size:12px; min-width:60px;">이름</th>
+    <th style="${thStyle}">반</th>
+    ${allTypes.map(t => `<th style="${thStyle}">${t.replace('통과','').replace('완료','').replace('불량','⚠️').replace('우수','⭐')}</th>`).join('')}
+    <th style="${thStyle} background:rgba(0,0,0,0.2);">합계</th>
+    <th style="${thStyle}">뽑기</th>
+  </tr>`;
+
+  // 바디
+  const target = getTarget;
+  document.getElementById('monthly-tbody').innerHTML = rows.map((r, i) => {
+    const bg = i % 2 === 0 ? '#fff' : '#f8fafc';
+    const tgt = getTarget(r.s.grade);
+    const canDraw = r.s.pts >= tgt;
+    const tagCls = r.s.grade&&r.s.grade.startsWith('초등') ? 'tag-elem' : r.s.grade === '중1' ? 'tag-mid1' : 'tag-mid23';
+    return `<tr style="background:${bg};">
+      <td style="padding:8px 4px 8px 12px;">
+        <div style="font-weight:700; font-size:13px;">${r.s.name}</div>
+        <span class="tag ${tagCls}" style="font-size:10px;">${r.s.grade}</span>
+      </td>
+      <td style="text-align:center; font-size:11px; color:var(--gray-500); padding:4px;">${r.s.cls || '-'}</td>
+      ${allTypes.map(t => {
+        const v = r.byType[t] || 0;
+        const color = v > 0 ? 'var(--green)' : v < 0 ? 'var(--red)' : 'var(--gray-300)';
+        return `<td style="text-align:center; font-size:12px; font-weight:${v !== 0 ? '700' : '400'}; color:${color}; padding:4px 2px;">${v !== 0 ? (v > 0 ? '+' : '') + v : '-'}</td>`;
+      }).join('')}
+      <td style="text-align:center; font-weight:900; font-size:14px; color:var(--blue); padding:4px; background:rgba(27,79,216,0.05);">${r.total > 0 ? '+' : ''}${r.total}</td>
+      <td style="text-align:center; font-size:12px; padding:4px;">
+        ${canDraw
+          ? '<span style="color:var(--green); font-weight:700;">🎰 가능</span>'
+          : `<span style="color:var(--gray-500); font-size:11px;">${tgt - r.s.pts}P 부족</span>`}
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function printStudentList() {
+  const q = document.getElementById('search-input')?.value.trim().toLowerCase() || '';
+  const clsFilter = document.getElementById('list-class-filter')?.value || '전체';
+  const sort = document.getElementById('list-sort')?.value || 'pts-desc';
+
+  let list = DB.students.filter(s => {
+    const matchName = s.name.includes(q) || (s.cls||'').toLowerCase().includes(q);
+    const matchCls = clsFilter === '전체' || s.cls === clsFilter;
+    return matchName && matchCls;
+  });
+  list = [...list].sort((a,b) => {
+    if (sort==='pts-desc') return b.pts-a.pts;
+    if (sort==='pts-asc') return a.pts-b.pts;
+    if (sort==='name') return a.name.localeCompare(b.name,'ko');
+    if (sort==='grade') return a.grade.localeCompare(b.grade,'ko');
+    if (sort==='class') return (a.cls||'').localeCompare(b.cls||'','ko');
+    return 0;
+  });
+
+  const sortLabel = {'pts-desc':'포인트 높은 순','pts-asc':'포인트 낮은 순','name':'이름순','grade':'학년순','class':'반순'};
+  const clsLabel = clsFilter === '전체' ? '전체' : clsFilter;
+  const now = new Date();
+  const dateStr = `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')}`;
+
+  const rows = list.map((s,i) => {
+    const target = getTarget(s.grade);
+    const pct = Math.min(100, Math.round(s.pts/target*100));
+    const rank = i+1;
+    const canDraw = s.pts >= target ? '🎰 가능' : `${target-s.pts}P 부족`;
+    return `<tr>
+      <td style="text-align:center; font-weight:700; color:${rank<=3?'#F59E0B':'#334155'};">${rank}</td>
+      <td style="font-weight:700; padding:8px 12px;">${s.name}</td>
+      <td style="text-align:center;">${s.grade}</td>
+      <td style="text-align:center;">${s.cls||'-'}</td>
+      <td style="text-align:center; font-weight:900; font-size:16px; color:#1B4FD8;">${s.pts}P</td>
+      <td style="text-align:center;">
+        <div style="background:#E2E8F0; border-radius:4px; height:8px; width:80px; display:inline-block; vertical-align:middle;">
+          <div style="background:${s.pts>=target?'#16A34A':'#1B4FD8'}; height:100%; width:${pct}%; border-radius:4px;"></div>
+        </div>
+        <span style="font-size:11px; color:#64748B; margin-left:4px;">${pct}%</span>
+      </td>
+      <td style="text-align:center; font-size:12px; color:${s.pts>=target?'#16A34A':'#94A3B8'}; font-weight:${s.pts>=target?'700':'400'};">${canDraw}</td>
+    </tr>`;
+  }).join('');
+
+  const printWin = window.open('', '_blank');
+  printWin.document.write(`<!DOCTYPE html><html><head>
+    <meta charset="UTF-8">
+    <title>AMI 포인트 현황 - ${dateStr}</title>
+    <style>
+      body { font-family: 'Malgun Gothic', sans-serif; margin: 20px; color: #0F172A; }
+      h2 { color: #1B4FD8; margin-bottom: 4px; font-size: 20px; }
+      .meta { font-size: 12px; color: #64748B; margin-bottom: 16px; }
+      table { width: 100%; border-collapse: collapse; font-size: 13px; }
+      th { background: #1B4FD8; color: white; padding: 10px 8px; text-align: center; }
+      th:nth-child(2) { text-align: left; padding-left: 12px; }
+      tr:nth-child(even) { background: #F8FAFC; }
+      td { padding: 8px; border-bottom: 1px solid #E2E8F0; vertical-align: middle; }
+      .footer { margin-top: 16px; font-size: 11px; color: #94A3B8; text-align: right; }
+      @media print {
+        button { display: none; }
+        body { margin: 10px; }
+      }
+    </style>
+  </head><body>
+    <h2>🏆 AMI 영어학원 · YBM ECC 이천어학원</h2>
+    <div class="meta">
+      포인트 현황 · ${clsLabel} · ${sortLabel[sort]} · 총 ${list.length}명 · 출력일: ${dateStr}
+    </div>
+    <table>
+      <thead><tr>
+        <th style="width:40px;">순위</th>
+        <th style="text-align:left; padding-left:12px;">이름</th>
+        <th>학년</th>
+        <th>반</th>
+        <th>포인트</th>
+        <th>달성률</th>
+        <th>뽑기</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div class="footer">AMI 영어학원 포인트 시스템 · ${dateStr} 기준</div>
+    <br>
+    <button onclick="window.print()" style="padding:10px 24px; background:#1B4FD8; color:white; border:none; border-radius:8px; font-size:14px; cursor:pointer;">🖨️ 인쇄하기</button>
+  </body></html>`);
+  printWin.document.close();
+}
+
+function getTarget(grade) {
+  if (grade && grade.startsWith('초등')) return DB.targets['초등'] || 60;
+  return DB.targets[grade] || (grade === '중1' ? 60 : 35);
+}
+
+function today() {
+  const d = new Date();
+  return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function setTodayDates() {
+  const t = today();
+  const di = document.getElementById('input-date');
+  const bdo = document.getElementById('bulk-date-only');
+  if (di && !di.value) di.value = t;
+  if (bdo && !bdo.value) bdo.value = t;
+  // 교시 hidden input 초기화
+  updateBulkDateValue();
+}
+
+function selectPeriod(btn) {
+  document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  updateBulkDateValue();
+  // 저장 버튼 텍스트 업데이트
+  const saveBtn = document.getElementById('bulk-save-btn');
+  if (saveBtn) saveBtn.textContent = `${btn.dataset.period} 포인트 저장`;
+}
+
+function updateBulkDateValue() {
+  const dateOnly = document.getElementById('bulk-date-only')?.value || today();
+  const activePeriod = document.querySelector('.period-btn.active')?.dataset.period || '1교시';
+  const hidden = document.getElementById('bulk-date');
+  if (hidden) hidden.value = `${dateOnly} ${activePeriod}`;
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+// ══════════════════════════════════════
+// 엑셀 일괄 등록
+// ══════════════════════════════════════
+let excelParsedData = [];
+
+function downloadTemplate() {
+  const csv = '\uFEFF이름,학년,반\n홍길동,초등,A반\n김영희,중1,화목반\n이철수,중2,월수반\n박민준,중3,';
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'AMI_학생등록양식.csv';
+  a.click();
+  toast('양식 다운로드! CSV 파일을 엑셀로 열어 작성 후 저장하세요.');
+}
+
+function handleExcelDrop(e) {
+  e.preventDefault();
+  const zone = document.getElementById('excel-drop-zone');
+  zone.style.borderColor = 'var(--gray-300)';
+  zone.style.background = 'var(--gray-50)';
+  const file = e.dataTransfer.files[0];
+  if (file) parseExcelFile(file);
+}
+
+function handleExcelFile(e) {
+  const file = e.target.files[0];
+  if (file) parseExcelFile(file);
+  e.target.value = '';
+}
+
+function parseExcelFile(file) {
+  if (!window.XLSX) { toast('라이브러리 로딩 중... 잠시 후 다시 시도해 주세요.'); return; }
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = new Uint8Array(e.target.result);
+      const wb = XLSX.read(data, { type: 'array' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+
+      excelParsedData = [];
+      const validGrades = ['초등1','초등2','초등3','초등4','초등5','초등6','중1','중2','중3'];
+
+      function normalizeGrade(g) {
+        g = String(g || '').trim().replace(/\s/g, '');
+        const map = {
+          '1':'초등1','2':'초등2','3':'초등3','4':'초등4','5':'초등5','6':'초등6',
+          '초1':'초등1','초2':'초등2','초3':'초등3','초4':'초등4','초5':'초등5','초6':'초등6',
+          '초등1학년':'초등1','초등2학년':'초등2','초등3학년':'초등3',
+          '초등4학년':'초등4','초등5학년':'초등5','초등6학년':'초등6',
+          '중학교1학년':'중1','중1학년':'중1','중학교1':'중1',
+          '중학교2학년':'중2','중2학년':'중2','중학교2':'중2',
+          '중학교3학년':'중3','중3학년':'중3','중학교3':'중3',
+        };
+        return map[g] || g;
+      }
+
+      // 구조 자동 감지: 3열씩 반복(이름,학년,반) 또는 세로형(이름,학년,반)
+      const firstRow = rows[0] || [];
+      const totalCols = firstRow.length;
+      const isMultiColumn = totalCols > 3; // 가로로 여러 반 배치된 형태
+
+      if (isMultiColumn) {
+        // 3열씩 묶어서 파싱
+        for (let r = 0; r < rows.length; r++) {
+          const row = rows[r];
+          for (let c = 0; c < row.length; c += 3) {
+            const name = String(row[c] || '').trim();
+            if (!name || name === '' || name === 'null') continue;
+            let grade = normalizeGrade(row[c+1]);
+            const cls = String(row[c+2] || '').trim();
+            const valid = validGrades.includes(grade);
+            const dup = DB.students.some(s => s.name === name && s.grade === grade);
+            excelParsedData.push({ name, grade, cls, valid, dup });
+          }
+        }
+      } else {
+        // 세로형 파싱 (기존 방식)
+        let startRow = 0;
+        if (rows.length > 0) {
+          const first = String(rows[0][0] || '').trim();
+          if (['이름','name','성명'].includes(first)) startRow = 1;
+        }
+        for (let i = startRow; i < rows.length; i++) {
+          const row = rows[i];
+          const name = String(row[0] || '').trim();
+          if (!name || name === 'null') continue;
+          let grade = normalizeGrade(row[1]);
+          const cls = String(row[2] || '').trim();
+          const valid = validGrades.includes(grade);
+          const dup = DB.students.some(s => s.name === name && s.grade === grade);
+          excelParsedData.push({ name, grade, cls, valid, dup });
+        }
+      }
+      renderExcelPreview();
+    } catch(err) {
+      toast('파일을 읽을 수 없습니다. 형식을 확인해 주세요.');
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function renderExcelPreview() {
+  if (excelParsedData.length === 0) { toast('데이터가 없습니다.'); return; }
+  const validCnt = excelParsedData.filter(r => r.valid && !r.dup).length;
+  const dupCnt = excelParsedData.filter(r => r.dup).length;
+  const errCnt = excelParsedData.filter(r => !r.valid).length;
+  document.getElementById('excel-count').textContent =
+    `총 ${excelParsedData.length}명 (등록가능 ${validCnt}명${dupCnt ? ' / 중복 ' + dupCnt + '명' : ''}${errCnt ? ' / 오류 ' + errCnt + '명' : ''})`;
+
+  document.getElementById('excel-preview-body').innerHTML = excelParsedData.map(r => {
+    const c = r.dup ? '#EA580C' : !r.valid ? '#DC2626' : '#16A34A';
+    const t = r.dup ? '중복' : !r.valid ? '학년오류' : '등록가능';
+    return `<tr>
+      <td style="padding-left:12px; font-weight:700;">${r.name}</td>
+      <td style="text-align:center;">${r.grade || '?'}</td>
+      <td style="text-align:center; font-size:12px; color:var(--gray-500);">${r.cls || '-'}</td>
+      <td style="text-align:center;"><span style="font-size:11px; font-weight:700; color:${c};">${t}</span></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('excel-preview').style.display = 'block';
+}
+
+function confirmExcelImport() {
+  const toAdd = excelParsedData.filter(r => r.valid && !r.dup);
+  if (toAdd.length === 0) { toast('등록 가능한 학생이 없습니다.'); return; }
+  toAdd.forEach(r => {
+    DB.students.push({ id: Date.now() + Math.random(), name: r.name, grade: r.grade, cls: r.cls, pts: 0 });
+  });
+  saveDB();
+  renderStudentList();
+  renderInputSelect();
+  updateBulkClassFilter();
+  cancelExcelImport();
+  toast(`${toAdd.length}명 등록 완료!`);
+}
+
+function cancelExcelImport() {
+  excelParsedData = [];
+  document.getElementById('excel-preview').style.display = 'none';
+  document.getElementById('excel-preview-body').innerHTML = '';
+}
+
+// 학년 버튼 선택
+function selectGrade(btn) {
+  document.querySelectorAll('.grade-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById('s-grade').value = btn.dataset.val;
+  document.getElementById('s-error').style.display = 'none';
+}
+
+// 초기화
+async function init() {
+  initFirebase();
+  await loadDB();
+}
+init();
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</body>
+</html>
