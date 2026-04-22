@@ -932,7 +932,7 @@ input:focus, select:focus { border-color: var(--blue); }
     <!-- 학생 목록 -->
     <div id="panel-students" class="admin-panel active">
       <div class="card">
-        <div class="section-head">전체 학생 (<span id="total-count">0</span>명)</div>
+        <div class="section-head">전체 학생</div>
         <div style="display:flex; gap:8px; margin-bottom:10px;">
           <input type="text" id="search-input" placeholder="이름 검색..." style="flex:1; margin-bottom:0;" oninput="renderStudentList()">
           <select id="list-class-filter" style="width:110px; margin-bottom:0;" onchange="renderStudentList()">
@@ -983,7 +983,7 @@ input:focus, select:focus { border-color: var(--blue); }
           </optgroup>
           <optgroup label="🎰 포인트 사용">
             <option value="뽑기사용">🎰 뽑기 사용 (학년별 자동차감)</option>
-            <option value="간식구매">🍭 간식 구매 (−30P)</option>
+            <option value="간식구매">🍭 간식 구매 (−10P)</option>
             <option value="직접차감">직접 차감 (−P 입력)</option>
           </optgroup>
           <optgroup label="✏️ 직접입력">
@@ -1120,6 +1120,13 @@ input:focus, select:focus { border-color: var(--blue); }
         <div style="font-size:13px; color:var(--gray-500); margin-bottom:10px;">한 줄에 한 명씩 입력: <strong>이름,학년,반</strong><br>예) 홍길동,초등,A반 / 김영희,중1,화목반</div>
         <textarea id="bulk-add-text" style="width:100%; height:120px; padding:12px; border:2px solid var(--gray-300); border-radius:10px; font-size:14px; font-family:'Noto Sans KR',sans-serif; resize:vertical; outline:none;" placeholder="홍길동,초등,A반&#10;김영희,중1,화목반&#10;이철수,중2,월수반"></textarea>
         <button class="btn btn-outline" style="margin-top:8px;" onclick="bulkAddStudents()">일괄 등록</button>
+      </div>
+
+      <div class="card">
+        <div class="section-head" style="color:var(--red);">🗑️ 그만둔 학생 삭제</div>
+        <div style="font-size:13px; color:var(--gray-500); margin-bottom:12px;">삭제하면 해당 학생의 포인트 내역도 모두 삭제됩니다.</div>
+        <input type="text" id="delete-search" placeholder="이름 검색..." style="margin-bottom:8px;" oninput="renderDeleteList()">
+        <div id="delete-list" style="max-height:300px; overflow-y:auto;"></div>
       </div>
 
       <div class="card">
@@ -1375,6 +1382,7 @@ function switchPanel(id, btn) {
   if (id === 'panel-bulk') { updateBulkClassFilter(); renderBulkTable(); }
   if (id === 'panel-monthly') { initMonthlySelects(); renderMonthly(); }
   if (id === 'panel-settings') { loadClassRenameSelect(); }
+  if (id === 'panel-add') { renderDeleteList(); }
 }
 
 // ══════════════════════════════════════
@@ -1475,7 +1483,7 @@ function renderStudentList() {
     if (sort === 'class') return (a.cls||'').localeCompare(b.cls||'', 'ko');
     return 0;
   });
-  document.getElementById('total-count').textContent = DB.students.length;
+  
 
   const colors = { elem: '#1B4FD8', '중1': '#16A34A', '중2': '#EA580C', '중3': '#DC2626' };
   const tagClass = g => g && g.startsWith('초등') ? 'tag-elem' : g === '중1' ? 'tag-mid1' : 'tag-mid23';
@@ -1529,7 +1537,7 @@ function filterInputStudents() {
     ? DB.students.filter(s => s.name.includes(q) || (s.cls||'').toLowerCase().includes(q) || s.grade.includes(q))
     : DB.students;
   const cur = sel.value;
-  sel.innerHTML = '<option value="">학생 선택 (' + filtered.length + '명)</option>' +
+  sel.innerHTML = '<option value="">학생 선택</option>' +
     filtered.map(s => `<option value="${s.id}" ${s.id==cur?'selected':''}>${s.name} (${s.grade} · ${s.cls||'반없음'})</option>`).join('');
 }
 
@@ -1572,7 +1580,7 @@ document.addEventListener('DOMContentLoaded', () => {
       preview.textContent = `🎰 뽑기 사용 → −${tgt}P (현재 ${s.pts}P → ${s.pts - tgt}P)`;
     } else if (v === '간식구매' && s) {
       preview.style.display = 'block';
-      preview.textContent = `🍭 간식 구매 → −30P (현재 ${s.pts}P → ${s.pts - 30}P)`;
+      preview.textContent = `🍭 간식 구매 → −10P (현재 ${s.pts}P → ${s.pts - 10}P)`;
     } else {
       preview.style.display = 'none';
     }
@@ -1627,9 +1635,9 @@ function submitSingle() {
       return;
     }
   } else if (type === '간식구매') {
-    pts = -30;
-    if (student.pts < 30) {
-      toast(`포인트 부족! (필요: 30P / 현재: ${student.pts}P)`);
+    pts = -10;
+    if (student.pts < 10) {
+      toast(`포인트 부족! (필요: 10P / 현재: ${student.pts}P)`);
       return;
     }
   } else {
@@ -1973,7 +1981,6 @@ function renderMonthly() {
   const avgPts = rows.length ? Math.round(totalPts / rows.length) : 0;
   const topStudent = rows[0];
   document.getElementById('monthly-summary').innerHTML = `
-    <div class="stat-card blue"><div class="s-num">${rows.length}</div><div class="s-label">대상 학생</div></div>
     <div class="stat-card green"><div class="s-num">${avgPts}</div><div class="s-label">평균 포인트</div></div>
     <div class="stat-card orange"><div class="s-num">${topStudent ? topStudent.total : 0}</div><div class="s-label">최고 ${topStudent ? topStudent.s.name : '-'}</div></div>
   `;
@@ -2177,6 +2184,40 @@ function loadClassRenameSelect() {
   const classes = [...new Set(DB.students.map(s => s.cls).filter(c => c && c.trim()))].sort();
   sel.innerHTML = '<option value="">반 선택</option>' +
     classes.map(c => `<option value="${c}">${c}</option>`).join('');
+}
+
+function renderDeleteList() {
+  const q = document.getElementById('delete-search')?.value.trim() || '';
+  const list = DB.students.filter(s => !q || s.name.includes(q) || (s.cls||'').includes(q));
+  const el = document.getElementById('delete-list');
+  if (!el) return;
+  if (list.length === 0) {
+    el.innerHTML = '<div style="text-align:center; padding:20px; color:var(--gray-500); font-size:13px;">검색 결과 없음</div>';
+    return;
+  }
+  el.innerHTML = list.map(s => `
+    <div style="display:flex; align-items:center; padding:10px 0; border-bottom:1px solid var(--gray-100); gap:10px;">
+      <div style="flex:1;">
+        <div style="font-size:14px; font-weight:700;">${s.name}</div>
+        <div style="font-size:12px; color:var(--gray-500);">${s.grade} · ${s.cls||'-'} · ${s.pts}P</div>
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="deleteStudent('${s.id}')">삭제</button>
+    </div>
+  `).join('');
+}
+
+async function deleteStudent(id) {
+  const s = DB.students.find(s => String(s.id) === String(id));
+  if (!s) return;
+  if (!confirm(`${s.name} 학생을 삭제하시겠습니까?
+포인트 내역도 모두 삭제됩니다.`)) return;
+  DB.students = DB.students.filter(s => String(s.id) !== String(id));
+  DB.history = DB.history.filter(h => String(h.sid) !== String(id));
+  await saveDB();
+  renderDeleteList();
+  renderStudentList();
+  renderInputSelect();
+  toast(`${s.name} 삭제 완료!`);
 }
 
 function getTarget(grade) {
