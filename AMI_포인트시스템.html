@@ -1589,24 +1589,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function isElem(grade) { return grade && grade.startsWith('초등'); }
 function getPts(type, grade) {
-  if (type === '출석') {
-    if (grade === '중1') return 10;
-    if (grade === '중2' || grade === '중3') return 4;
-    return 1;
-  }
-  if (type === '단어통과') {
-    if (grade === '중1') return 3;
-    if (grade === '중2' || grade === '중3') return 2;
-    return 1;
-  }
-  if (type === '숙제완료') {
-    if (grade === '중1') return 5;
-    if (grade === '중2' || grade === '중3') return 4;
-    return 1;
-  }
-  if (type === '지각' || type === '태도불량') return -1;
+  // 모든 항목 학년 구분 없이 1P씩 (교시별 누적 방식)
+  if (type === '출석') return 1;
+  if (type === '단어통과') return 1;
+  if (type === '숙제완료') return 1;
   if (type === '태도우수') return 1;
   if (type === '원서') return 1;
+  if (type === '지각' || type === '태도불량') return -1;
   return 0;
 }
 
