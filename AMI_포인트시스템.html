@@ -1568,7 +1568,7 @@ async function addStudent() {
   const cls = document.getElementById('add-class').value.trim();
   if (!name) { toast('이름을 입력하세요.'); return; }
   if (DB.students.find(s => s.name === name && s.grade === grade)) { toast('이미 등록된 학생입니다.'); return; }
-  const id = Date.now() + Math.floor(Math.random()*1000);
+  const id = String(Date.now()) + String(Math.floor(Math.random()*1000));
   DB.students.push({ id, name, grade, cls, pts: 0 });
   await saveDB();
   document.getElementById('add-name').value = '';
@@ -1591,7 +1591,7 @@ async function bulkAddStudents() {
     const [name, grade, cls] = parts;
     if (!name || !grade) return;
     if (DB.students.find(s => s.name === name && s.grade === grade)) return;
-    DB.students.push({ id: Date.now() + Math.floor(Math.random()*1000), name, grade, cls: cls||'', pts: 0 });
+    DB.students.push({ id: String(Date.now()) + String(Math.floor(Math.random()*1000)), name, grade, cls: cls||'', pts: 0 });
     added++;
   });
   await saveDB();
@@ -2100,7 +2100,7 @@ async function confirmExcelImport() {
   const toAdd = excelParsedData.filter(r => r.valid && !r.dup);
   if (toAdd.length === 0) { toast('등록 가능한 학생이 없습니다.'); return; }
   toAdd.forEach(r => {
-    DB.students.push({ id: Date.now() + Math.floor(Math.random()*1000), name: r.name, grade: r.grade, cls: r.cls, pts: 0 });
+    DB.students.push({ id: String(Date.now()) + String(Math.floor(Math.random()*1000)), name: r.name, grade: r.grade, cls: r.cls, pts: 0 });
   });
   toast('저장 중...');
   await saveDB();
@@ -2123,13 +2123,13 @@ function cancelExcelImport() {
 async function init() {
   initFirebase();
   await loadDB();
-  // ID 마이그레이션
+  // ID를 모두 String으로 통일
   let changed = false;
   DB.students.forEach(s => {
-    if (!Number.isInteger(s.id)) {
-      const newId = Math.round(s.id);
-      DB.history.forEach(h => { if (h.sid === s.id) h.sid = newId; });
-      s.id = newId;
+    const strId = String(s.id);
+    if (String(s.id) !== strId || typeof s.id !== 'string') {
+      DB.history.forEach(h => { if (String(h.sid) === String(s.id)) h.sid = strId; });
+      s.id = strId;
       changed = true;
     }
   });
