@@ -1825,9 +1825,9 @@ function addStudent() {
   if (DB.students.find(s => s.name === name && s.grade === grade)) {
     toast('이미 등록된 학생입니다.'); return;
   }
-  const id = Date.now();
+  const id = Date.now() + Math.floor(Math.random()*1000);
   DB.students.push({ id, name, grade, cls, pts: 0 });
-  saveDB();
+  await saveDB();
   document.getElementById('add-name').value = '';
   document.getElementById('add-class').value = '';
   renderStudentList();
@@ -1849,7 +1849,7 @@ function bulkAddStudents() {
     DB.students.push({ id: Date.now() + Math.floor(Math.random()*1000), name, grade, cls: '', pts: 0 });
     added++;
   });
-  saveDB();
+  await saveDB();
   renderStudentList();
   renderInputSelect();
   document.getElementById('bulk-add-text').value = '';
@@ -2406,13 +2406,14 @@ function renderExcelPreview() {
   document.getElementById('excel-preview').style.display = 'block';
 }
 
-function confirmExcelImport() {
+async function confirmExcelImport() {
   const toAdd = excelParsedData.filter(r => r.valid && !r.dup);
   if (toAdd.length === 0) { toast('등록 가능한 학생이 없습니다.'); return; }
   toAdd.forEach(r => {
     DB.students.push({ id: Date.now() + Math.floor(Math.random()*1000), name: r.name, grade: r.grade, cls: r.cls, pts: 0 });
   });
-  saveDB();
+  toast('저장 중...');
+  await saveDB();
   renderStudentList();
   renderInputSelect();
   updateBulkClassFilter();
