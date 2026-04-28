@@ -1347,9 +1347,13 @@ function filterInputStudents() {
   const filtered = q
     ? DB.students.filter(s => s.name.includes(q) || (s.cls||'').toLowerCase().includes(q) || s.grade.includes(q))
     : DB.students;
-  const cur = sel.value;
+  // 현재 선택된 학생 인덱스 기억
+  const curIdx = sel.value;
   sel.innerHTML = '<option value="">학생 선택</option>' +
-    filtered.map(s => `<option value="${s.id}"${String(s.id)===String(cur)?' selected':''}>${s.name} (${s.grade} · ${s.cls||'반없음'})</option>`).join('');
+    filtered.map((s, i) => {
+      const idx = DB.students.indexOf(s);
+      return `<option value="${idx}"${String(curIdx)===String(idx)?' selected':''}>${s.name} (${s.grade} · ${s.cls||'반없음'})</option>`;
+    }).join('');
 }
 
 function updateInputTarget() {
@@ -1370,8 +1374,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('custom-pts-wrap').style.display = v === '직접입력' ? 'block' : 'none';
     document.getElementById('custom-deduct-wrap').style.display = v === '직접차감' ? 'block' : 'none';
     const preview = document.getElementById('use-preview');
-    const sid = document.getElementById('input-student').value;
-    const s = DB.students.find(s => String(s.id) === String(sid));
+    const sidx = document.getElementById('input-student').value;
+    const s = sidx !== '' ? DB.students[parseInt(sidx)] : null;
     if (v === '뽑기사용' && s) {
       const tgt = getTarget(s.grade);
       preview.style.display = 'block';
@@ -1382,6 +1386,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       preview.style.display = 'none';
     }
+
   });
 });
 
@@ -1396,12 +1401,12 @@ function getPts(type) {
 }
 
 function submitSingle() {
-  const idVal = document.getElementById('input-student').value;
+  const idxVal = document.getElementById('input-student').value;
   const type = document.getElementById('input-type').value;
   const date = document.getElementById('input-date').value;
   const memo = document.getElementById('input-memo').value;
-  if (!idVal || !type) { toast('학생과 항목을 선택하세요.'); return; }
-  const student = DB.students.find(s => String(s.id) === String(idVal));
+  if (idxVal === '' || !type) { toast('학생과 항목을 선택하세요.'); return; }
+  const student = DB.students[parseInt(idxVal)];
   if (!student) { toast('학생을 찾을 수 없습니다.'); return; }
   let pts;
   if (type === '직접입력') {
@@ -1467,6 +1472,7 @@ function renderBulkTable() {
   tbody.innerHTML = list.map((s, i) => {
     const bg = i % 2 === 0 ? '#fff' : '#f8fafc';
     const tagCls = s.grade&&s.grade.startsWith('초등') ? 'tag-elem' : s.grade === '중1' ? 'tag-mid1' : 'tag-mid23';
+    const globalIdx = DB.students.indexOf(s);
     return `<tr style="background:${bg};">
       <td style="padding:7px 4px 7px 12px; white-space:nowrap;">
         <div style="font-weight:700; font-size:13px;">${s.name}</div>
@@ -1476,14 +1482,14 @@ function renderBulkTable() {
       ${BULK_TYPES.map(t => t.input ? `
       <td style="text-align:center; padding:4px 2px;">
         <div class="eta-wrap">
-          <button class="eta-btn eta-btn-minus" onclick="etaChange('${s.id}', -1)">−</button>
-          <span class="eta-val" id="eta-${s.id}" data-val="0">0</span>
-          <input type="hidden" class="brow-input" data-sid="${s.id}" data-type="${t.key}" value="0">
-          <button class="eta-btn eta-btn-plus" onclick="etaChange('${s.id}', 1)">+</button>
+          <button class="eta-btn eta-btn-minus" onclick="etaChange(${globalIdx}, -1)">−</button>
+          <span class="eta-val" id="eta-${globalIdx}" data-val="0">0</span>
+          <input type="hidden" class="brow-input" data-sidx="${globalIdx}" data-type="${t.key}" value="0">
+          <button class="eta-btn eta-btn-plus" onclick="etaChange(${globalIdx}, 1)">+</button>
         </div>
       </td>` : `
       <td style="text-align:center; padding:4px 2px;">
-        <input type="checkbox" class="brow-chk" data-sid="${s.id}" data-type="${t.key}"
+        <input type="checkbox" class="brow-chk" data-sidx="${globalIdx}" data-type="${t.key}"
           onchange="updateBulkPreviewMsg()"
           style="width:18px; height:18px; cursor:pointer; accent-color:${t.plus ? 'var(--blue)' : 'var(--red)'};">
       </td>`).join('')}
@@ -1498,7 +1504,7 @@ function bulkCheckAll(type, checked) {
     document.querySelectorAll('.brow-chk').forEach(c => c.checked = false);
     document.querySelectorAll('.brow-input').forEach(c => {
       c.value = '0';
-      const el = document.getElementById('eta-' + c.dataset.sid);
+      const el = document.getElementById('eta-' + c.dataset.sidx);
       if (el) { el.textContent = '0'; el.dataset.val = '0'; el.className = 'eta-val'; }
     });
   } else {
@@ -1531,8 +1537,8 @@ async function submitBulk() {
   if (checked.length === 0 && inputs.length === 0) { toast('체크된 항목이 없습니다.'); return; }
 
   const toSave = [];
-  checked.forEach(c => toSave.push({ sid: String(c.dataset.sid), type: c.dataset.type, isInput: false }));
-  inputs.forEach(inp => toSave.push({ sid: String(inp.dataset.sid), type: '기타', isInput: true, pts: parseInt(inp.value) }));
+  checked.forEach(c => toSave.push({ sidx: parseInt(c.dataset.sidx), type: c.dataset.type, isInput: false }));
+  inputs.forEach(inp => toSave.push({ sidx: parseInt(inp.dataset.sidx), type: '기타', isInput: true, pts: parseInt(inp.value) }));
 
   const btn = document.getElementById('bulk-save-btn');
   if (btn) { btn.disabled = true; btn.textContent = '저장 중...'; }
@@ -1541,7 +1547,7 @@ async function submitBulk() {
   const studentMap = {};
 
   toSave.forEach(item => {
-    const s = DB.students.find(s => String(s.id) === item.sid);
+    const s = DB.students[item.sidx];
     if (!s) return;
     const pts = item.isInput ? item.pts : getPts(item.type);
     if (pts === 0) return;
@@ -1549,7 +1555,7 @@ async function submitBulk() {
     const typeLabel = item.isInput ? `기타(${pts > 0 ? '+' : ''}${pts}P)` : item.type;
     DB.history.push({ sid: s.id, date, type: typeLabel, pts });
     totalApplied++;
-    studentMap[item.sid] = true;
+    studentMap[item.sidx] = true;
   });
 
   await saveDB();
@@ -1822,9 +1828,9 @@ function printStudentList() {
   printWin.document.close();
 }
 
-function etaChange(sid, delta) {
-  const hidden = document.querySelector(`.brow-input[data-sid="${sid}"]`);
-  const el = document.getElementById('eta-' + sid);
+function etaChange(sidx, delta) {
+  const hidden = document.querySelector(`.brow-input[data-sidx="${sidx}"]`);
+  const el = document.getElementById('eta-' + sidx);
   if (!hidden || !el) return;
   let val = parseInt(hidden.value || 0) + delta;
   if (val > 99) val = 99;
