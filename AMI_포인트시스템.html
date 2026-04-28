@@ -1379,7 +1379,7 @@ function switchPanel(id, btn) {
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   btn.classList.add('active');
-  if (id === 'panel-bulk') { updateBulkClassFilter(); renderBulkTable(); }
+  if (id === 'panel-bulk') { updateBulkClassFilter(); renderBulkTable(); setTodayDates(); }
   if (id === 'panel-monthly') { initMonthlySelects(); renderMonthly(); }
   if (id === 'panel-settings') { loadClassRenameSelect(); }
   if (id === 'panel-add') { renderDeleteList(); }
@@ -1708,6 +1708,8 @@ function renderBulkTable() {
     </tr>`;
   }).join('');
   updateBulkPreviewMsg();
+  // 날짜 초기화
+  if (!document.getElementById('bulk-date-only')?.value) setTodayDates();
 }
 
 function bulkCheckAll(type, checked) {
@@ -1743,46 +1745,75 @@ function updateBulkPreviewMsg() {
   msg.style.color = 'var(--blue)';
 }
 
-function submitBulk() {
+async function submitBulk() {
+  // 날짜 강제 업데이트
+  updateBulkDateValue();
   const date = document.getElementById('bulk-date').value || today();
-  const checked = document.querySelectorAll('.brow-chk:checked');
+  const checked = [...document.querySelectorAll('.brow-chk:checked')];
   const inputs = [...document.querySelectorAll('.brow-input')].filter(i => parseInt(i.value || 0) !== 0);
 
   if (checked.length === 0 && inputs.length === 0) { toast('체크된 항목이 없습니다.'); return; }
 
+  // 저장 전 체크된 항목 미리 수집 (DOM이 바뀌기 전에)
+  const toSave = [];
+  checked.forEach(c => {
+    toSave.push({ sid: c.dataset.sid, type: c.dataset.type, isInput: false, pts: null });
+  });
+  inputs.forEach(inp => {
+    toSave.push({ sid: inp.dataset.sid, type: '기타', isInput: true, pts: parseInt(inp.value) });
+  });
+
+  // 저장 버튼 비활성화
+  const btn = document.getElementById('bulk-save-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '저장 중...'; }
+
+  // Firebase에서 최신 데이터 먼저 불러오기 (동시 입력 충돌 방지)
+  if (firebaseReady) {
+    try {
+      const doc = await db_firestore.collection('ami').doc('data').get();
+      if (doc.exists) {
+        const latest = doc.data();
+        // 최신 학생 포인트와 히스토리로 업데이트
+        if (latest.students) {
+          latest.students.forEach(ls => {
+            const local = DB.students.find(s => String(s.id) === String(ls.id));
+            if (local) { local.pts = ls.pts; }
+          });
+        }
+        if (latest.history) DB.history = latest.history;
+      }
+    } catch(e) { console.warn('최신 데이터 불러오기 실패, 로컬 사용:', e); }
+  }
+
+  // 최신 데이터 기반으로 포인트 적용
   let totalApplied = 0;
   const studentMap = {};
 
-  // 체크박스 항목 처리
-  checked.forEach(c => {
-    const sid = c.dataset.sid;
-    const type = c.dataset.type;
-    const s = DB.students.find(s => String(s.id) === String(sid));
-    if (s) {
-      const pts = getPts(type, s.grade);
-      s.pts += pts;
-      DB.history.push({ sid: s.id, date, type, pts });
-      totalApplied++;
-      studentMap[sid] = true;
+  toSave.forEach(item => {
+    const s = DB.students.find(s => String(s.id) === String(item.sid));
+    if (!s) return;
+    let pts;
+    if (item.isInput) {
+      pts = item.pts;
+    } else {
+      pts = getPts(item.type, s.grade);
     }
+    if (pts === 0) return;
+    s.pts += pts;
+    const typeLabel = item.isInput ? `기타(${pts > 0 ? '+' : ''}${pts}P)` : item.type;
+    DB.history.push({ sid: s.id, date, type: typeLabel, pts });
+    totalApplied++;
+    studentMap[item.sid] = true;
   });
 
-  // 기타 숫자입력 처리
-  inputs.forEach(inp => {
-    const sid = inp.dataset.sid;
-    const pts = parseInt(inp.value);
-    const s = DB.students.find(s => String(s.id) === String(sid));
-    if (s && pts !== 0) {
-      s.pts += pts;
-      DB.history.push({ sid: s.id, date, type: `기타(${pts > 0 ? '+' : ''}${pts}P)`, pts });
-      totalApplied++;
-      studentMap[sid] = true;
-    }
-  });
-
-  saveDB();
+  await saveDB();
   renderBulkTable();
   renderStudentList();
+
+  // 버튼 복원
+  const activePeriod = document.querySelector('.period-btn.active')?.dataset.period || '1교시';
+  if (btn) { btn.disabled = false; btn.textContent = `${activePeriod} 포인트 저장`; }
+
   toast(`${Object.keys(studentMap).length}명 · ${totalApplied}건 저장 완료!`);
 }
 
