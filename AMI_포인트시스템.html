@@ -1815,7 +1815,7 @@ function bulkAddStudents() {
     const [name, grade] = parts;
     if (!name || !grade) return;
     if (DB.students.find(s => s.name === name && s.grade === grade)) return;
-    DB.students.push({ id: Date.now() + Math.random(), name, grade, cls: '', pts: 0 });
+    DB.students.push({ id: Date.now() + Math.floor(Math.random()*1000), name, grade, cls: '', pts: 0 });
     added++;
   });
   saveDB();
@@ -2379,7 +2379,7 @@ function confirmExcelImport() {
   const toAdd = excelParsedData.filter(r => r.valid && !r.dup);
   if (toAdd.length === 0) { toast('등록 가능한 학생이 없습니다.'); return; }
   toAdd.forEach(r => {
-    DB.students.push({ id: Date.now() + Math.random(), name: r.name, grade: r.grade, cls: r.cls, pts: 0 });
+    DB.students.push({ id: Date.now() + Math.floor(Math.random()*1000), name: r.name, grade: r.grade, cls: r.cls, pts: 0 });
   });
   saveDB();
   renderStudentList();
@@ -2407,7 +2407,26 @@ function selectGrade(btn) {
 async function init() {
   initFirebase();
   await loadDB();
+  // 기존 소수점 ID 정수로 변환
+  migrateIds();
 }
+
+function migrateIds() {
+  let changed = false;
+  DB.students.forEach(s => {
+    if (!Number.isInteger(s.id)) {
+      const newId = Math.round(s.id);
+      // history도 같이 변경
+      DB.history.forEach(h => {
+        if (h.sid === s.id) h.sid = newId;
+      });
+      s.id = newId;
+      changed = true;
+    }
+  });
+  if (changed) saveDB();
+}
+
 init();
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
